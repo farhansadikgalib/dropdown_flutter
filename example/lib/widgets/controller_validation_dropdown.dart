@@ -5,7 +5,7 @@ import 'package:dropdown_flutter_example/model/model.dart';
 import 'package:flutter/material.dart';
 
 class ControllerValidationDropdown extends StatefulWidget {
-  const ControllerValidationDropdown({Key? key}) : super(key: key);
+  const ControllerValidationDropdown({super.key});
 
   @override
   State<ControllerValidationDropdown> createState() =>

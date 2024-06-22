@@ -5,7 +5,7 @@ import 'package:dropdown_flutter_example/model/model.dart';
 import 'package:flutter/material.dart';
 
 class ValidationDropdown extends StatelessWidget {
-  ValidationDropdown({Key? key}) : super(key: key);
+  ValidationDropdown({super.key});
 
   final _formKey = GlobalKey<FormState>();
 
@@ -52,8 +52,7 @@ class ValidationDropdown extends StatelessWidget {
 }
 
 class MultiSelectValidationDropdown extends StatelessWidget {
-  MultiSelectValidationDropdown({Key? key}) : super(key: key);
-
+  MultiSelectValidationDropdown({super.key});
   final _formKey = GlobalKey<FormState>();
 
   @override

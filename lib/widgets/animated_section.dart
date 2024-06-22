@@ -7,7 +7,6 @@ class _AnimatedSection extends StatefulWidget {
   final double axisAlignment;
 
   const _AnimatedSection({
-    super.key,
     this.expand = false,
     required this.animationDismissed,
     required this.child,

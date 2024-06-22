@@ -5,7 +5,7 @@ import 'package:dropdown_flutter_example/model/model.dart';
 import 'package:flutter/material.dart';
 
 class MultiSelectControllerDropdown extends StatefulWidget {
-  const MultiSelectControllerDropdown({Key? key}) : super(key: key);
+  const MultiSelectControllerDropdown({super.key});
 
   @override
   State<MultiSelectControllerDropdown> createState() =>

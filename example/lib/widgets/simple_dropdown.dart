@@ -11,7 +11,7 @@ const List<String> _list = [
 ];
 
 class SimpleDropdown extends StatelessWidget {
-  const SimpleDropdown({Key? key}) : super(key: key);
+  const SimpleDropdown({super.key});
 
   @override
   Widget build(BuildContext context) {

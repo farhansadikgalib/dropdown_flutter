@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class DecoratedDropdown extends StatelessWidget {
-  const DecoratedDropdown({Key? key}) : super(key: key);
+  const DecoratedDropdown({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +94,7 @@ class DecoratedDropdown extends StatelessWidget {
 }
 
 class MultiSelectDecoratedDropdown extends StatelessWidget {
-  const MultiSelectDecoratedDropdown({Key? key}) : super(key: key);
+  const MultiSelectDecoratedDropdown({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -13,7 +13,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           brightness: Brightness.light,
           seedColor: Colors.blue,
-          background: Colors.grey[200],
+          primary: Colors.grey[200],
         ),
       ),
     );
@@ -34,8 +34,7 @@ class MyApp extends StatelessWidget {
 }
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
-
+  const Home({super.key});
   @override
   State<Home> createState() => _HomeState();
 }
@@ -46,7 +45,7 @@ class _HomeState extends State<Home> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.primary,
           title: const Text(

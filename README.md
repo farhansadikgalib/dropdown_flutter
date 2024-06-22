@@ -1,6 +1,6 @@
 # Dropdown Flutter
 
-**Dropdown Flutter** designed to enhance your Flutter application, offers highly customizable dropdowns with advanced features including list data search, network search, and multiple-selection.
+**DropdownFlutter** designed to enhance your Flutter application, offers highly customizable dropdowns with advanced features including list data search, network search, and multiple-selection.
 
 ## Features
 
@@ -25,7 +25,7 @@ Lots of properties to use and customize dropdown widget as per your need. Also u
 
 ```dart
 dependencies:
-  dropdown_flutter: 1.0.0
+  dropdown_flutter: 1.0.1
 ```
 
 2. Import the package and use it in your Flutter App.
