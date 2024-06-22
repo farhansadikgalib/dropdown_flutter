@@ -29,11 +29,8 @@ screenshots:
     path: screenshots/ss_3.jpg
 
 topics:
-  - ui
+  - widget
   - dropdown
   - spinner
-  - widget
-  - widgets
-  - flutter
-  - animated dropdown
-  - custom dropdown
+  - animated-dropdown
+  - custom-dropdown
