@@ -1,10 +1,6 @@
 # Dropdown Flutter
 
-**Dropdown Flutter** package lets you add customizable animated dropdown widget.
-
-
-
-### If you like this package, please leave a like on [pub.dev](https://pub.dev/packages/dropdown_flutter) and star on [GitHub](https://github.com/farhansadikgalib/dropdown_flutter).
+**Dropdown Flutter** designed to enhance your Flutter application, offers highly customizable dropdowns with advanced features including list data search, network search, and multiple-selection.
 
 ## Features
 
@@ -18,7 +14,7 @@ Lots of properties to use and customize dropdown widget as per your need. Also u
 - Multi select Dropdown Flutter with search request field using named constructor DropdownFlutter<T>.multiSelectSearchRequest().
 
 ## Preview
-
+<img src="https://raw.githubusercontent.com/farhansadikgalib/dropdown_flutter/main/screenshots/preview.gif" width="300"/>
 
 
 <hr>
