@@ -61,9 +61,7 @@ class _HomeState extends State<Home> {
             tabs: [
               Padding(
                 padding: EdgeInsets.only(bottom: 8.0),
-                child: Text(
-                  'Single selection',
-                ),
+                child: Text('Single selection'),
               ),
               Padding(
                 padding: EdgeInsets.only(bottom: 8.0),
@@ -103,7 +101,7 @@ class _HomeState extends State<Home> {
                 const SizedBox(height: 16),
                 MultiSelectValidationDropdown(),
                 const SizedBox(height: 16),
-                const MultiSelectControllerDropdown()
+                const MultiSelectControllerDropdown(),
               ],
             ),
           ],

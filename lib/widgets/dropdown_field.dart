@@ -86,7 +86,8 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
       itemList != null ? itemList.join(', ') : oneItem.toString(),
       maxLines: widget.maxLines,
       overflow: TextOverflow.ellipsis,
-      style: widget.headerStyle ??
+      style:
+          widget.headerStyle ??
           TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -100,11 +101,9 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
       hint,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: widget.hintStyle ??
-          const TextStyle(
-            fontSize: 16,
-            color: Color(0xFFA7A7A7),
-          ),
+      style:
+          widget.hintStyle ??
+          const TextStyle(fontSize: 16, color: Color(0xFFA7A7A7)),
     );
   }
 
@@ -126,7 +125,8 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
       child: Container(
         padding: widget.headerPadding ?? _defaultHeaderPadding,
         decoration: BoxDecoration(
-          color: widget.fillColor ??
+          color:
+              widget.fillColor ??
               (widget.enabled
                   ? CustomDropdownDecoration._defaultFillColor
                   : CustomDropdownDecoration._defaultFillColor.withOpacity(.5)),
@@ -142,12 +142,14 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
             ],
             Expanded(
               child: switch (widget.dropdownType) {
-                _DropdownType.singleSelect => selectedItem != null
-                    ? headerBuilder(context)
-                    : hintBuilder(context),
-                _DropdownType.multipleSelect => selectedItems.isNotEmpty
-                    ? headerListBuilder(context)
-                    : hintBuilder(context),
+                _DropdownType.singleSelect =>
+                  selectedItem != null
+                      ? headerBuilder(context)
+                      : hintBuilder(context),
+                _DropdownType.multipleSelect =>
+                  selectedItems.isNotEmpty
+                      ? headerListBuilder(context)
+                      : hintBuilder(context),
               },
             ),
             const SizedBox(width: 12),

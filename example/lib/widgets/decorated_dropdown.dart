@@ -125,19 +125,13 @@ class MultiSelectDecoratedDropdown extends StatelessWidget {
       decoration: CustomDropdownDecoration(
         closedFillColor: Colors.black,
         expandedFillColor: Colors.black,
-        hintStyle: TextStyle(
-          color: Colors.blue[200],
-          fontSize: 16,
-        ),
+        hintStyle: TextStyle(color: Colors.blue[200], fontSize: 16),
         headerStyle: const TextStyle(
           color: Colors.blue,
           fontSize: 18,
           fontWeight: FontWeight.w500,
         ),
-        noResultFoundStyle: const TextStyle(
-          color: Colors.blue,
-          fontSize: 16,
-        ),
+        noResultFoundStyle: const TextStyle(color: Colors.blue, fontSize: 16),
         prefixIcon: const Icon(Icons.person, color: Colors.blue),
         closedSuffixIcon: const Icon(
           Icons.keyboard_arrow_down,

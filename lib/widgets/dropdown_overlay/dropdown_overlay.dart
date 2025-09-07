@@ -1,16 +1,18 @@
 part of '../../custom_dropdown.dart';
 
-const _defaultOverlayIconUp = Icon(
-  Icons.keyboard_arrow_up_rounded,
-  size: 20,
-);
+const _defaultOverlayIconUp = Icon(Icons.keyboard_arrow_up_rounded, size: 20);
 
 const _defaultHeaderPadding = EdgeInsets.all(16.0);
-const _overlayOuterPadding =
-    EdgeInsetsDirectional.only(bottom: 12, start: 12, end: 12);
+const _overlayOuterPadding = EdgeInsetsDirectional.only(
+  bottom: 12,
+  start: 12,
+  end: 12,
+);
 const _defaultOverlayShadowOffset = Offset(0, 6);
-const _defaultListItemPadding =
-    EdgeInsets.symmetric(vertical: 12, horizontal: 16);
+const _defaultListItemPadding = EdgeInsets.symmetric(
+  vertical: 12,
+  horizontal: 16,
+);
 
 class _DropdownOverlay<T> extends StatefulWidget {
   final List<T> items;
@@ -157,11 +159,9 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
       items != null ? items.join(', ') : item.toString(),
       maxLines: widget.maxLines,
       overflow: TextOverflow.ellipsis,
-      style: widget.headerStyle ??
-          const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+      style:
+          widget.headerStyle ??
+          const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
     );
   }
 
@@ -170,11 +170,9 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
       hint,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: widget.hintStyle ??
-          const TextStyle(
-            fontSize: 16,
-            color: Color(0xFFA7A7A7),
-          ),
+      style:
+          widget.hintStyle ??
+          const TextStyle(fontSize: 16, color: Color(0xFFA7A7A7)),
     );
   }
 
@@ -263,8 +261,9 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
     final overlayOffset = Offset(-12, displayOverlayBottom ? 0 : 64);
 
     // list padding
-    final listPadding =
-        onSearch ? const EdgeInsets.only(top: 8) : EdgeInsets.zero;
+    final listPadding = onSearch
+        ? const EdgeInsets.only(top: 8)
+        : EdgeInsets.zero;
 
     // items list
     final list = items.isNotEmpty
@@ -282,10 +281,10 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
             dropdownType: widget.dropdownType,
           )
         : (mayFoundSearchRequestResult != null &&
-                    !mayFoundSearchRequestResult!) ||
-                widget.searchType == _SearchType.onListData
-            ? noResultFoundBuilder(context)
-            : const SizedBox(height: 12);
+                  !mayFoundSearchRequestResult!) ||
+              widget.searchType == _SearchType.onListData
+        ? noResultFoundBuilder(context)
+        : const SizedBox(height: 12);
 
     final child = Stack(
       children: [
@@ -293,20 +292,23 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
           width: widget.size.width + 24,
           child: CompositedTransformFollower(
             link: widget.layerLink,
-            followerAnchor:
-                displayOverlayBottom ? Alignment.topLeft : Alignment.bottomLeft,
+            followerAnchor: displayOverlayBottom
+                ? Alignment.topLeft
+                : Alignment.bottomLeft,
             showWhenUnlinked: false,
             offset: overlayOffset,
             child: Container(
               key: key1,
               margin: _overlayOuterPadding,
               decoration: BoxDecoration(
-                color: decoration?.expandedFillColor ??
+                color:
+                    decoration?.expandedFillColor ??
                     CustomDropdownDecoration._defaultFillColor,
                 border: decoration?.expandedBorder,
                 borderRadius:
                     decoration?.expandedBorderRadius ?? _defaultBorderRadius,
-                boxShadow: decoration?.expandedShadow ??
+                boxShadow:
+                    decoration?.expandedShadow ??
                     [
                       BoxShadow(
                         blurRadius: 24.0,
@@ -327,10 +329,10 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                         ? widget.overlayHeight ?? (onSearch ? 270 : 225)
                         : null,
                     child: ClipRRect(
-                      borderRadius: decoration?.expandedBorderRadius ??
+                      borderRadius:
+                          decoration?.expandedBorderRadius ??
                           _defaultBorderRadius,
-                      child:
-                          NotificationListener<OverscrollIndicatorNotification>(
+                      child: NotificationListener<OverscrollIndicatorNotification>(
                         onNotification: (notification) {
                           notification.disallowIndicator();
                           return true;
@@ -339,16 +341,16 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                           data: Theme.of(context).copyWith(
                             scrollbarTheme:
                                 decoration?.overlayScrollbarDecoration ??
-                                    ScrollbarThemeData(
-                                      thumbVisibility: WidgetStateProperty.all(
-                                        true,
-                                      ),
-                                      thickness: WidgetStateProperty.all(5),
-                                      radius: const Radius.circular(4),
-                                      thumbColor: WidgetStateProperty.all(
-                                        Colors.grey[300],
-                                      ),
-                                    ),
+                                ScrollbarThemeData(
+                                  thumbVisibility: WidgetStateProperty.all(
+                                    true,
+                                  ),
+                                  thickness: WidgetStateProperty.all(5),
+                                  radius: const Radius.circular(4),
+                                  thumbColor: WidgetStateProperty.all(
+                                    Colors.grey[300],
+                                  ),
+                                ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -361,7 +363,8 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                     setState(() => displayOverly = false);
                                   },
                                   child: Padding(
-                                    padding: widget.headerPadding ??
+                                    padding:
+                                        widget.headerPadding ??
                                         _defaultHeaderPadding,
                                     child: Row(
                                       children: [
@@ -480,8 +483,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                             const SizedBox(width: 12),
                                           ],
                                           Expanded(
-                                            child:
-                                                _SearchField<T>.forRequestData(
+                                            child: _SearchField<T>.forRequestData(
                                               items: widget.items,
                                               searchHintText:
                                                   widget.searchHintText,
@@ -528,7 +530,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                       ),
                                     )
                               else
-                                items.length > 4 ? Expanded(child: list) : list
+                                items.length > 4 ? Expanded(child: list) : list,
                             ],
                           ),
                         ),
