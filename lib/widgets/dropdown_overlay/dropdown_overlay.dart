@@ -126,11 +126,14 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
     return Row(
       children: [
         Expanded(
-          child: Text(
-            result.toString(),
-            maxLines: widget.maxLines,
-            overflow: TextOverflow.ellipsis,
-            style: widget.listItemStyle ?? const TextStyle(fontSize: 16),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 2.0),
+            child: Text(
+              result.toString(),
+              maxLines: widget.maxLines,
+              overflow: TextOverflow.ellipsis,
+              style: widget.listItemStyle ?? const TextStyle(fontSize: 16),
+            ),
           ),
         ),
         if (widget.dropdownType == _DropdownType.multipleSelect)
