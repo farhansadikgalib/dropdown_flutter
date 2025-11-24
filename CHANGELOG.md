@@ -9,3 +9,4 @@
 # 1.0.2
 
 - Bug fixes and performance improvements.
+- Updated README.md to reference correct package version.

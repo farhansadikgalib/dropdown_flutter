@@ -39,7 +39,7 @@
 Add the latest version to your `pubspec.yaml`:
 ```yaml
 dependencies:
-  dropdown_flutter: 1.0.1
+  dropdown_flutter: ^1.0.2
 ```
 Run `flutter pub get` and import:
 ```dart
