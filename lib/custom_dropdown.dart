@@ -1,9 +1,8 @@
-library animated_custom_dropdown;
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 export 'custom_dropdown.dart';
 
@@ -178,6 +177,62 @@ class DropdownFlutter<T> extends StatefulWidget {
 
   final _DropdownType _dropdownType;
 
+  /// Open/close animation duration.
+  ///
+  /// Defaults to 300 milliseconds.
+  final Duration? animationDuration;
+
+  /// Open/close animation curve.
+  ///
+  /// Defaults to [Curves.linearToEaseOut].
+  final Curve? animationCurve;
+
+  /// Provide haptic feedback when the dropdown opens and on item selection.
+  ///
+  /// Defaults to false.
+  final bool enableHapticFeedback;
+
+  /// Groups items under section headers using the returned group label.
+  ///
+  /// When null (default) items are shown as a flat list.
+  final String Function(T item)? groupBy;
+
+  /// Builds a custom header for a group produced by [groupBy].
+  final _GroupHeaderBuilder? groupHeaderBuilder;
+
+  /// Maximum number of recently-selected items pinned at the top of the list.
+  ///
+  /// Defaults to 0, which disables the recently-selected section.
+  final int recentSelectionsMaxCount;
+
+  /// Seeds the recently-selected section.
+  final List<T>? initialRecentItems;
+
+  /// Called whenever the recently-selected list changes.
+  final ValueChanged<List<T>>? onRecentItemsChanged;
+
+  /// Enable arrow-key navigation, Enter to select and Escape to close.
+  ///
+  /// Defaults to false.
+  final bool enableKeyboardNavigation;
+
+  /// Highlight the matched substring within search results.
+  ///
+  /// Only applicable to the search constructors and the default list item.
+  /// Defaults to false.
+  final bool highlightMatchedText;
+
+  /// Show a "select all / clear all" action row.
+  ///
+  /// Only applicable to the multi-select constructors. Defaults to false.
+  final bool showSelectAll;
+
+  /// Label for the select-all action. Defaults to "Select all".
+  final String? selectAllText;
+
+  /// Label for the clear-all action. Defaults to "Clear all".
+  final String? clearAllText;
+
   DropdownFlutter({
     super.key,
     required this.items,
@@ -205,6 +260,19 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.excludeSelected = true,
     this.enabled = true,
     this.disabledDecoration,
+    this.animationDuration,
+    this.animationCurve,
+    this.enableHapticFeedback = false,
+    this.groupBy,
+    this.groupHeaderBuilder,
+    this.recentSelectionsMaxCount = 0,
+    this.initialRecentItems,
+    this.onRecentItemsChanged,
+    this.enableKeyboardNavigation = false,
+    this.highlightMatchedText = false,
+    this.showSelectAll = false,
+    this.selectAllText,
+    this.clearAllText,
   }) : assert(
          initialItem == null || controller == null,
          'Only one of initialItem or controller can be specified at a time',
@@ -265,6 +333,19 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.enabled = true,
     this.disabledDecoration,
     this.closeDropDownOnClearFilterSearch = false,
+    this.animationDuration,
+    this.animationCurve,
+    this.enableHapticFeedback = false,
+    this.groupBy,
+    this.groupHeaderBuilder,
+    this.recentSelectionsMaxCount = 0,
+    this.initialRecentItems,
+    this.onRecentItemsChanged,
+    this.enableKeyboardNavigation = false,
+    this.highlightMatchedText = false,
+    this.showSelectAll = false,
+    this.selectAllText,
+    this.clearAllText,
   }) : assert(
          initialItem == null || controller == null,
          'Only one of initialItem or controller can be specified at a time',
@@ -324,6 +405,19 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.enabled = true,
     this.disabledDecoration,
     this.closeDropDownOnClearFilterSearch = false,
+    this.animationDuration,
+    this.animationCurve,
+    this.enableHapticFeedback = false,
+    this.groupBy,
+    this.groupHeaderBuilder,
+    this.recentSelectionsMaxCount = 0,
+    this.initialRecentItems,
+    this.onRecentItemsChanged,
+    this.enableKeyboardNavigation = false,
+    this.highlightMatchedText = false,
+    this.showSelectAll = false,
+    this.selectAllText,
+    this.clearAllText,
   }) : assert(
          initialItem == null || controller == null,
          'Only one of initialItem or controller can be specified at a time',
@@ -363,6 +457,19 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.listItemPadding,
     this.enabled = true,
     this.disabledDecoration,
+    this.animationDuration,
+    this.animationCurve,
+    this.enableHapticFeedback = false,
+    this.groupBy,
+    this.groupHeaderBuilder,
+    this.recentSelectionsMaxCount = 0,
+    this.initialRecentItems,
+    this.onRecentItemsChanged,
+    this.enableKeyboardNavigation = false,
+    this.highlightMatchedText = false,
+    this.showSelectAll = false,
+    this.selectAllText,
+    this.clearAllText,
   }) : assert(
          initialItems == null || multiSelectController == null,
          'Only one of initialItems or controller can be specified at a time',
@@ -425,6 +532,19 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.enabled = true,
     this.disabledDecoration,
     this.closeDropDownOnClearFilterSearch = false,
+    this.animationDuration,
+    this.animationCurve,
+    this.enableHapticFeedback = false,
+    this.groupBy,
+    this.groupHeaderBuilder,
+    this.recentSelectionsMaxCount = 0,
+    this.initialRecentItems,
+    this.onRecentItemsChanged,
+    this.enableKeyboardNavigation = false,
+    this.highlightMatchedText = false,
+    this.showSelectAll = false,
+    this.selectAllText,
+    this.clearAllText,
   }) : assert(
          initialItems == null || multiSelectController == null,
          'Only one of initialItems or controller can be specified at a time',
@@ -486,6 +606,19 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.enabled = true,
     this.disabledDecoration,
     this.closeDropDownOnClearFilterSearch = false,
+    this.animationDuration,
+    this.animationCurve,
+    this.enableHapticFeedback = false,
+    this.groupBy,
+    this.groupHeaderBuilder,
+    this.recentSelectionsMaxCount = 0,
+    this.initialRecentItems,
+    this.onRecentItemsChanged,
+    this.enableKeyboardNavigation = false,
+    this.highlightMatchedText = false,
+    this.showSelectAll = false,
+    this.selectAllText,
+    this.clearAllText,
   }) : assert(
          initialItems == null || multiSelectController == null,
          'Only one of initialItems or controller can be specified at a time',
@@ -506,11 +639,25 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
   final layerLink = LayerLink();
   late SingleSelectController<T?> selectedItemNotifier;
   late MultiSelectController<T> selectedItemsNotifier;
+  late List<T> _recentItems;
   FormFieldState<(T?, List<T>)>? _formFieldState;
+
+  void _registerRecent(T value) {
+    if (widget.recentSelectionsMaxCount <= 0) return;
+    final updated = List<T>.of(_recentItems)..remove(value);
+    updated.insert(0, value);
+    if (updated.length > widget.recentSelectionsMaxCount) {
+      updated.removeRange(widget.recentSelectionsMaxCount, updated.length);
+    }
+    setState(() => _recentItems = updated);
+    widget.onRecentItemsChanged?.call(_recentItems);
+  }
 
   @override
   void initState() {
     super.initState();
+
+    _recentItems = List<T>.of(widget.initialRecentItems ?? <T>[]);
 
     selectedItemNotifier =
         widget.controller ?? SingleSelectController(widget.initialItem);
@@ -614,6 +761,7 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
               overlay: (size, hideCallback) {
                 return _DropdownOverlay<T>(
                   onItemSelect: (T value) {
+                    bool registerRecent = true;
                     switch (widget._dropdownType) {
                       case _DropdownType.singleSelect:
                         selectedItemNotifier.value = value;
@@ -621,11 +769,13 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
                         final currentVal = selectedItemsNotifier.value.toList();
                         if (currentVal.contains(value)) {
                           currentVal.remove(value);
+                          registerRecent = false;
                         } else {
                           currentVal.add(value);
                         }
                         selectedItemsNotifier.value = currentVal;
                     }
+                    if (registerRecent) _registerRecent(value);
                   },
                   noResultFoundText:
                       widget.noResultFoundText ?? 'No result found.',
@@ -663,6 +813,19 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
                   searchRequestLoadingIndicator:
                       widget.searchRequestLoadingIndicator,
                   dropdownType: widget._dropdownType,
+                  animationDuration: widget.animationDuration,
+                  animationCurve: widget.animationCurve,
+                  enableHapticFeedback: widget.enableHapticFeedback,
+                  groupBy: widget.groupBy,
+                  groupHeaderBuilder: widget.groupHeaderBuilder,
+                  recentSelectionsMaxCount: widget.recentSelectionsMaxCount,
+                  initialRecentItems: _recentItems,
+                  onRecentItemsChanged: widget.onRecentItemsChanged,
+                  enableKeyboardNavigation: widget.enableKeyboardNavigation,
+                  highlightMatchedText: widget.highlightMatchedText,
+                  showSelectAll: widget.showSelectAll,
+                  selectAllText: widget.selectAllText,
+                  clearAllText: widget.clearAllText,
                 );
               },
               child: (showCallback) {
@@ -708,6 +871,7 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
                     dropdownType: widget._dropdownType,
                     selectedItemsNotifier: selectedItemsNotifier,
                     enabled: widget.enabled,
+                    enableHapticFeedback: widget.enableHapticFeedback,
                   ),
                 );
               },

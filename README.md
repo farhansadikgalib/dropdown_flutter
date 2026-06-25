@@ -11,12 +11,15 @@ A highly customizable Flutter dropdown package with search, network search, mult
 - Multi-select - Select multiple items
 - Form validation - Built-in validation support
 - Custom models - Use any data type
+- Modern UX (all opt-in) - Haptic feedback, keyboard navigation, search-term
+  highlighting, grouped sections, recent selections, select-all and a
+  configurable open/close animation
 
 ## Installation
 
 ```yaml
 dependencies:
-  dropdown_flutter: ^1.0.3
+  dropdown_flutter: ^1.1.0
 ```
 
 ## Quick Start
@@ -124,6 +127,96 @@ DropdownFlutter<String>(
   items: ['Engineer', 'Designer', 'Manager'],
   validator: (value) => value == null ? 'Required' : null,
   validateOnChange: true,
+  onChanged: (value) => print(value),
+)
+```
+
+## Modern UX features (opt-in)
+
+Every feature below is **off by default** — existing usage is unaffected. Enable
+only what you need.
+
+### Haptic feedback
+
+```dart
+DropdownFlutter<String>(
+  items: items,
+  enableHapticFeedback: true, // light impact on open, click on select
+  onChanged: (value) => print(value),
+)
+```
+
+### Keyboard navigation
+
+Arrow Up/Down to move the highlight, Enter to select, Escape to close.
+
+```dart
+DropdownFlutter<String>(
+  items: items,
+  enableKeyboardNavigation: true,
+  decoration: const CustomDropdownDecoration(
+    listItemDecoration: ListItemDecoration(highlightedColor: Color(0xFFE8F0FE)),
+  ),
+  onChanged: (value) => print(value),
+)
+```
+
+### Search-term highlighting
+
+```dart
+DropdownFlutter<String>.search(
+  items: items,
+  highlightMatchedText: true,
+  decoration: const CustomDropdownDecoration(
+    listItemDecoration: ListItemDecoration(
+      searchMatchTextStyle: TextStyle(fontWeight: FontWeight.w700),
+    ),
+  ),
+  onChanged: (value) => print(value),
+)
+```
+
+### Grouped sections
+
+```dart
+DropdownFlutter<String>(
+  items: items,
+  groupBy: (item) => item.startsWith('A') ? 'A' : 'Other',
+  // groupHeaderBuilder: (context, label) => MyHeader(label), // optional
+  onChanged: (value) => print(value),
+)
+```
+
+### Recent selections
+
+```dart
+DropdownFlutter<String>(
+  items: items,
+  recentSelectionsMaxCount: 3,
+  initialRecentItems: const ['Engineer'],          // optional seed
+  onRecentItemsChanged: (recents) => persist(recents), // optional persistence
+  onChanged: (value) => print(value),
+)
+```
+
+### Select all (multi-select)
+
+```dart
+DropdownFlutter<String>.multiSelect(
+  items: items,
+  showSelectAll: true,
+  // selectAllText: 'Select all', clearAllText: 'Clear all', // optional
+  onListChanged: (list) => print(list),
+)
+```
+
+### Configurable animation
+
+```dart
+DropdownFlutter<String>(
+  items: items,
+  animationDuration: const Duration(milliseconds: 220),
+  animationCurve: Curves.easeOutCubic,
   onChanged: (value) => print(value),
 )
 ```

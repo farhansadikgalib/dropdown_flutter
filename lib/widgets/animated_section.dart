@@ -5,12 +5,16 @@ class _AnimatedSection extends StatefulWidget {
   final VoidCallback animationDismissed;
   final Widget child;
   final double axisAlignment;
+  final Duration? duration;
+  final Curve? curve;
 
   const _AnimatedSection({
     this.expand = false,
     required this.animationDismissed,
     required this.child,
     required this.axisAlignment,
+    this.duration,
+    this.curve,
   });
 
   @override
@@ -33,7 +37,7 @@ class _AnimatedSectionState extends State<_AnimatedSection>
     animController =
         AnimationController(
           vsync: this,
-          duration: const Duration(milliseconds: 300),
+          duration: widget.duration ?? const Duration(milliseconds: 300),
         )..addStatusListener((status) {
           if (status == AnimationStatus.dismissed) {
             widget.animationDismissed();
@@ -42,7 +46,7 @@ class _AnimatedSectionState extends State<_AnimatedSection>
 
     animation = CurvedAnimation(
       parent: animController,
-      curve: Curves.linearToEaseOut,
+      curve: widget.curve ?? Curves.linearToEaseOut,
     );
   }
 

@@ -13,6 +13,7 @@ const _defaultListItemPadding = EdgeInsets.symmetric(
   vertical: 12,
   horizontal: 16,
 );
+const _recentSelectionsTitle = 'Recently selected';
 
 class _DropdownOverlay<T> extends StatefulWidget {
   final List<T> items;
@@ -40,6 +41,19 @@ class _DropdownOverlay<T> extends StatefulWidget {
   final _NoResultFoundBuilder? noResultFoundBuilder;
   final CustomDropdownDecoration? decoration;
   final _DropdownType dropdownType;
+  final Duration? animationDuration;
+  final Curve? animationCurve;
+  final bool enableHapticFeedback;
+  final String Function(T item)? groupBy;
+  final _GroupHeaderBuilder? groupHeaderBuilder;
+  final int recentSelectionsMaxCount;
+  final List<T>? initialRecentItems;
+  final ValueChanged<List<T>>? onRecentItemsChanged;
+  final bool enableKeyboardNavigation;
+  final bool highlightMatchedText;
+  final bool showSelectAll;
+  final String? selectAllText;
+  final String? clearAllText;
 
   const _DropdownOverlay({
     Key? key,
@@ -77,6 +91,19 @@ class _DropdownOverlay<T> extends StatefulWidget {
     required this.listItemBuilder,
     required this.headerListBuilder,
     required this.noResultFoundBuilder,
+    this.animationDuration,
+    this.animationCurve,
+    this.enableHapticFeedback = false,
+    this.groupBy,
+    this.groupHeaderBuilder,
+    this.recentSelectionsMaxCount = 0,
+    this.initialRecentItems,
+    this.onRecentItemsChanged,
+    this.enableKeyboardNavigation = false,
+    this.highlightMatchedText = false,
+    this.showSelectAll = false,
+    this.selectAllText,
+    this.clearAllText,
   });
 
   @override
@@ -91,6 +118,8 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
   late T? selectedItem;
   late List<T> selectedItems;
   late ScrollController scrollController;
+  String searchQuery = '';
+  int? highlightedRowIndex;
   final key1 = GlobalKey(), key2 = GlobalKey();
 
   Widget hintBuilder(BuildContext context) {
@@ -128,12 +157,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(right: 2.0),
-            child: Text(
-              result.toString(),
-              maxLines: widget.maxLines,
-              overflow: TextOverflow.ellipsis,
-              style: widget.listItemStyle ?? const TextStyle(fontSize: 16),
-            ),
+            child: _itemLabel(context, result),
           ),
         ),
         if (widget.dropdownType == _DropdownType.multipleSelect)
@@ -233,6 +257,191 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
     super.dispose();
   }
 
+  void _onQueryChanged(String query) {
+    setState(() {
+      searchQuery = query;
+      highlightedRowIndex = null;
+    });
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.escape) {
+      setState(() => displayOverly = false);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.arrowDown) {
+      _moveHighlight(1);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.arrowUp) {
+      _moveHighlight(-1);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.enter ||
+        key == LogicalKeyboardKey.numpadEnter) {
+      final rows = _buildRows();
+      final idx = highlightedRowIndex;
+      if (idx != null && idx >= 0 && idx < rows.length) {
+        final row = rows[idx];
+        if (row is _ItemRow<T>) {
+          onItemSelect(row.item);
+          return KeyEventResult.handled;
+        }
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  void _moveHighlight(int delta) {
+    final rows = _buildRows();
+    final itemIndexes = [
+      for (var i = 0; i < rows.length; i++)
+        if (rows[i] is _ItemRow<T>) i,
+    ];
+    if (itemIndexes.isEmpty) return;
+    int pos;
+    if (highlightedRowIndex == null ||
+        !itemIndexes.contains(highlightedRowIndex)) {
+      pos = delta > 0 ? 0 : itemIndexes.length - 1;
+    } else {
+      final current = itemIndexes.indexOf(highlightedRowIndex!);
+      pos = (current + delta).clamp(0, itemIndexes.length - 1);
+    }
+    final newRowIndex = itemIndexes[pos];
+    setState(() => highlightedRowIndex = newRowIndex);
+    _ensureRowVisible(newRowIndex);
+  }
+
+  void _ensureRowVisible(int rowIndex) {
+    if (!scrollController.hasClients) return;
+    final pad = widget.listItemPadding ?? _defaultListItemPadding;
+    final rowHeight = pad.vertical + 24.0;
+    final target = rowIndex * rowHeight;
+    final pos = scrollController.position;
+    final viewStart = pos.pixels;
+    final viewEnd = viewStart + pos.viewportDimension;
+    double? to;
+    if (target < viewStart) {
+      to = target;
+    } else if (target + rowHeight > viewEnd) {
+      to = target + rowHeight - pos.viewportDimension;
+    }
+    if (to != null) {
+      scrollController.animateTo(
+        to.clamp(pos.minScrollExtent, pos.maxScrollExtent),
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  /// A "select all / clear all" action row for multi-select dropdowns.
+  Widget _selectAllRow() {
+    final allItems = widget.items;
+    final selectedSet = selectedItems.toSet();
+    final selectedCount = allItems.where(selectedSet.contains).length;
+    final allSelected = allItems.isNotEmpty && selectedCount == allItems.length;
+    final noneSelected = selectedCount == 0;
+    final triValue = allSelected ? true : (noneSelected ? false : null);
+
+    void toggle() {
+      if (widget.enableHapticFeedback) {
+        HapticFeedback.selectionClick();
+      }
+      final next = allSelected ? <T>[] : List<T>.of(allItems);
+      widget.selectedItemsNotifier.value = next;
+      setState(() => selectedItems = next);
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: toggle,
+        child: Padding(
+          padding: widget.listItemPadding ?? _defaultListItemPadding,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  allSelected
+                      ? (widget.clearAllText ?? 'Clear all')
+                      : (widget.selectAllText ?? 'Select all'),
+                  style: (widget.listItemStyle ?? const TextStyle(fontSize: 16))
+                      .copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 12.0),
+                child: Checkbox(
+                  tristate: true,
+                  value: triValue,
+                  onChanged: (_) => toggle(),
+                  activeColor:
+                      widget.decoration?.listItemDecoration?.selectedIconColor,
+                  side: widget.decoration?.listItemDecoration?.selectedIconBorder,
+                  shape: widget.decoration?.listItemDecoration?.selectedIconShape,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: const VisualDensity(
+                    horizontal: VisualDensity.minimumDensity,
+                    vertical: VisualDensity.minimumDensity,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the item label, optionally highlighting the searched substring.
+  Widget _itemLabel(BuildContext context, T result) {
+    final text = result.toString();
+    final style = widget.listItemStyle ?? const TextStyle(fontSize: 16);
+    final query = searchQuery.trim();
+
+    if (!widget.highlightMatchedText || query.isEmpty) {
+      return Text(
+        text,
+        maxLines: widget.maxLines,
+        overflow: TextOverflow.ellipsis,
+        style: style,
+      );
+    }
+
+    final matchStyle = style.merge(
+      widget.decoration?.listItemDecoration?.searchMatchTextStyle ??
+          ListItemDecoration._defaultSearchMatchTextStyle,
+    );
+    final lower = text.toLowerCase();
+    final q = query.toLowerCase();
+    final spans = <TextSpan>[];
+    int start = 0;
+    int idx;
+    while ((idx = lower.indexOf(q, start)) != -1) {
+      if (idx > start) {
+        spans.add(TextSpan(text: text.substring(start, idx)));
+      }
+      spans.add(
+        TextSpan(text: text.substring(idx, idx + q.length), style: matchStyle),
+      );
+      start = idx + q.length;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start)));
+    }
+
+    return Text.rich(
+      TextSpan(style: style, children: spans),
+      maxLines: widget.maxLines,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
   void singleSelectListener() {
     if (mounted) {
       selectedItem = widget.selectedItemNotifier.value;
@@ -245,7 +454,46 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
     }
   }
 
+  /// Builds the flat list of rows shown in the overlay, interleaving optional
+  /// "recently selected" and group-header rows with selectable item rows.
+  List<_Row<T>> _buildRows() {
+    final rows = <_Row<T>>[];
+
+    final recentSource = widget.initialRecentItems ?? const [];
+    final showRecents =
+        widget.recentSelectionsMaxCount > 0 &&
+        recentSource.isNotEmpty &&
+        searchQuery.isEmpty;
+    if (showRecents) {
+      final recents = recentSource
+          .where((e) => widget.items.contains(e))
+          .toList();
+      if (recents.isNotEmpty) {
+        rows.add(_HeaderRow<T>(_recentSelectionsTitle));
+        rows.addAll(recents.map((e) => _ItemRow<T>(e)));
+      }
+    }
+
+    if (widget.groupBy != null) {
+      final groups = <String, List<T>>{};
+      for (final item in items) {
+        (groups[widget.groupBy!(item)] ??= <T>[]).add(item);
+      }
+      groups.forEach((label, groupItems) {
+        rows.add(_HeaderRow<T>(label));
+        rows.addAll(groupItems.map((e) => _ItemRow<T>(e)));
+      });
+    } else {
+      rows.addAll(items.map((e) => _ItemRow<T>(e)));
+    }
+
+    return rows;
+  }
+
   void onItemSelect(T value) {
+    if (widget.enableHapticFeedback) {
+      HapticFeedback.selectionClick();
+    }
     widget.onItemSelect(value);
     if (widget.dropdownType == _DropdownType.singleSelect) {
       setState(() => displayOverly = false);
@@ -268,6 +516,9 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
         ? const EdgeInsets.only(top: 8)
         : EdgeInsets.zero;
 
+    // rows (items + optional group/recent headers)
+    final rows = _buildRows();
+
     // items list
     final list = items.isNotEmpty
         ? _ItemsList<T>(
@@ -276,12 +527,14 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
             excludeSelected: items.length > 1 ? widget.excludeSelected : false,
             selectedItem: selectedItem,
             selectedItems: selectedItems,
-            items: items,
+            rows: rows,
             itemsListPadding: widget.itemsListPadding ?? listPadding,
             listItemPadding: widget.listItemPadding ?? _defaultListItemPadding,
             onItemSelect: onItemSelect,
             decoration: decoration?.listItemDecoration,
             dropdownType: widget.dropdownType,
+            groupHeaderBuilder: widget.groupHeaderBuilder,
+            highlightedRowIndex: highlightedRowIndex,
           )
         : (mayFoundSearchRequestResult != null &&
                   !mayFoundSearchRequestResult!) ||
@@ -315,7 +568,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                     [
                       BoxShadow(
                         blurRadius: 24.0,
-                        color: Colors.black.withOpacity(.08),
+                        color: Colors.black.withValues(alpha: .08),
                         offset: _defaultOverlayShadowOffset,
                       ),
                     ],
@@ -326,6 +579,8 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                   animationDismissed: widget.hideOverlay,
                   expand: displayOverly,
                   axisAlignment: displayOverlayBottom ? 1.0 : -1.0,
+                  duration: widget.animationDuration,
+                  curve: widget.animationCurve,
                   child: SizedBox(
                     key: key2,
                     height: items.length > 4
@@ -401,6 +656,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                   _SearchField<T>.forListData(
                                     items: widget.items,
                                     searchHintText: widget.searchHintText,
+                                    onQueryChanged: _onQueryChanged,
                                     onSearchedItems: (val) {
                                       setState(() => items = val);
                                     },
@@ -430,6 +686,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                               items: widget.items,
                                               searchHintText:
                                                   widget.searchHintText,
+                                              onQueryChanged: _onQueryChanged,
                                               onSearchedItems: (val) {
                                                 setState(() => items = val);
                                               },
@@ -451,6 +708,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                   _SearchField<T>.forRequestData(
                                     items: widget.items,
                                     searchHintText: widget.searchHintText,
+                                    onQueryChanged: _onQueryChanged,
                                     onFutureRequestLoading: (val) {
                                       setState(() {
                                         isSearchRequestLoading = val;
@@ -490,6 +748,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                               items: widget.items,
                                               searchHintText:
                                                   widget.searchHintText,
+                                              onQueryChanged: _onQueryChanged,
                                               onFutureRequestLoading: (val) {
                                                 setState(() {
                                                   isSearchRequestLoading = val;
@@ -516,6 +775,11 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                       ),
                                     ),
                                   ),
+                              if (widget.showSelectAll &&
+                                  widget.dropdownType ==
+                                      _DropdownType.multipleSelect &&
+                                  widget.items.isNotEmpty)
+                                _selectAllRow(),
                               if (isSearchRequestLoading)
                                 widget.searchRequestLoadingIndicator ??
                                     const Padding(
@@ -548,22 +812,28 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
       ],
     );
 
-    if (widget.canCloseOutsideBounds) {
-      return Stack(
-        children: [
-          GestureDetector(
-            onTap: () => setState(() => displayOverly = false),
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              color: Colors.transparent,
-            ),
-          ),
-          child,
-        ],
-      );
-    }
+    final content = widget.canCloseOutsideBounds
+        ? Stack(
+            children: [
+              GestureDetector(
+                onTap: () => setState(() => displayOverly = false),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  color: Colors.transparent,
+                ),
+              ),
+              child,
+            ],
+          )
+        : child;
 
-    return child;
+    if (!widget.enableKeyboardNavigation) return content;
+
+    return Focus(
+      autofocus: !onSearch,
+      onKeyEvent: _handleKeyEvent,
+      child: content,
+    );
   }
 }

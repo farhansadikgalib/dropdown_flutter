@@ -1,6 +1,7 @@
 import 'package:dropdown_flutter_example/widgets/controller_validation_dropdown.dart';
 import 'package:dropdown_flutter_example/widgets/decorated_dropdown.dart';
 import 'package:dropdown_flutter_example/widgets/multi_select_controller_dropdown.dart';
+import 'package:dropdown_flutter_example/widgets/modern_ux_dropdown.dart';
 import 'package:dropdown_flutter_example/widgets/multi_select_dropdown.dart';
 import 'package:dropdown_flutter_example/widgets/search_dropdown.dart';
 import 'package:dropdown_flutter_example/widgets/search_request_dropdown.dart';
@@ -43,7 +44,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.primary,
         appBar: AppBar(
@@ -66,6 +67,10 @@ class _HomeState extends State<Home> {
               Padding(
                 padding: EdgeInsets.only(bottom: 8.0),
                 child: Text('Multi selection'),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 8.0),
+                child: Text('Modern UX'),
               ),
             ],
           ),
@@ -102,6 +107,16 @@ class _HomeState extends State<Home> {
                 MultiSelectValidationDropdown(),
                 const SizedBox(height: 16),
                 const MultiSelectControllerDropdown(),
+              ],
+            ),
+            ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: const [
+                ModernUxDropdown(),
+                SizedBox(height: 16),
+                HighlightSearchDropdown(),
+                SizedBox(height: 16),
+                SelectAllDropdown(),
               ],
             ),
           ],

@@ -23,6 +23,7 @@ class _DropDownField<T> extends StatefulWidget {
   final _HintBuilder? hintBuilder;
   final _DropdownType dropdownType;
   final bool enabled;
+  final bool enableHapticFeedback;
   final MultiSelectController<T> selectedItemsNotifier;
 
   const _DropDownField({
@@ -46,6 +47,7 @@ class _DropDownField<T> extends StatefulWidget {
     this.suffixIcon,
     this.headerPadding,
     this.enabled = true,
+    this.enableHapticFeedback = false,
   });
 
   @override
@@ -91,7 +93,7 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
           TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: widget.enabled ? null : Colors.black.withOpacity(.5),
+            color: widget.enabled ? null : Colors.black.withValues(alpha: .5),
           ),
     );
   }
@@ -121,7 +123,12 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: () {
+        if (widget.enableHapticFeedback) {
+          HapticFeedback.lightImpact();
+        }
+        widget.onTap();
+      },
       child: Container(
         padding: widget.headerPadding ?? _defaultHeaderPadding,
         decoration: BoxDecoration(
@@ -129,7 +136,9 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
               widget.fillColor ??
               (widget.enabled
                   ? CustomDropdownDecoration._defaultFillColor
-                  : CustomDropdownDecoration._defaultFillColor.withOpacity(.5)),
+                  : CustomDropdownDecoration._defaultFillColor.withValues(
+                      alpha: .5,
+                    )),
           border: widget.border,
           borderRadius: widget.borderRadius ?? _defaultBorderRadius,
           boxShadow: widget.shadow,
@@ -158,7 +167,7 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
                     ? _defaultOverlayIconDown
                     : Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: Colors.black.withOpacity(.5),
+                        color: Colors.black.withValues(alpha: .5),
                         size: 20,
                       )),
           ],

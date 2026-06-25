@@ -8,6 +8,7 @@ class _SearchField<T> extends StatefulWidget {
   final Future<List<T>> Function(String)? futureRequest;
   final Duration? futureRequestDelay;
   final ValueChanged<bool>? onFutureRequestLoading, mayFoundResult;
+  final ValueChanged<String>? onQueryChanged;
   final SearchFieldDecoration? decoration;
 
   const _SearchField.forListData({
@@ -16,6 +17,7 @@ class _SearchField<T> extends StatefulWidget {
     required this.onSearchedItems,
     required this.searchHintText,
     required this.decoration,
+    this.onQueryChanged,
   }) : searchType = _SearchType.onListData,
        futureRequest = null,
        futureRequestDelay = null,
@@ -32,6 +34,7 @@ class _SearchField<T> extends StatefulWidget {
     required this.onFutureRequestLoading,
     required this.mayFoundResult,
     required this.decoration,
+    this.onQueryChanged,
   }) : searchType = _SearchType.onRequestData;
 
   @override
@@ -74,6 +77,7 @@ class _SearchFieldState<T> extends State<_SearchField<T>> {
   void onClear() {
     if (searchCtrl.text.isNotEmpty) {
       searchCtrl.clear();
+      widget.onQueryChanged?.call('');
       widget.onSearchedItems(widget.items);
     }
   }
@@ -102,6 +106,7 @@ class _SearchFieldState<T> extends State<_SearchField<T>> {
         focusNode: focusNode,
         style: widget.decoration?.textStyle,
         onChanged: (val) async {
+          widget.onQueryChanged?.call(val);
           if (val.isEmpty) {
             isFieldEmpty = true;
           } else if (isFieldEmpty) {
@@ -157,7 +162,7 @@ class _SearchFieldState<T> extends State<_SearchField<T>> {
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Colors.grey.withOpacity(.25),
+                  color: Colors.grey.withValues(alpha: .25),
                   width: 1,
                 ),
               ),
@@ -166,7 +171,7 @@ class _SearchFieldState<T> extends State<_SearchField<T>> {
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Colors.grey.withOpacity(.25),
+                  color: Colors.grey.withValues(alpha: .25),
                   width: 1,
                 ),
               ),
@@ -175,7 +180,7 @@ class _SearchFieldState<T> extends State<_SearchField<T>> {
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Colors.grey.withOpacity(.25),
+                  color: Colors.grey.withValues(alpha: .25),
                   width: 1,
                 ),
               ),
