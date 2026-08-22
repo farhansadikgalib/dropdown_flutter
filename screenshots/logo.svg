@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Dropdown Flutter logo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6B5FA8"/>
+      <stop offset="0.55" stop-color="#514785"/>
+      <stop offset="1" stop-color="#3C3466"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="drop" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#1E1A38" flood-opacity="0.30"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" rx="232" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="232" fill="url(#sheen)"/>
+
+  <!-- Closed field: the collapsed dropdown header -->
+  <g filter="url(#drop)">
+    <rect x="204" y="252" width="616" height="150" rx="40" fill="#FFFFFF"/>
+  </g>
+  <rect x="256" y="312" width="286" height="30" rx="15" fill="#B9B3D6"/>
+  <!-- Chevron -->
+  <path d="M654 309 l52 52 52 -52" fill="none" stroke="#514785" stroke-width="34"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Expanded list: three rows, the first one selected -->
+  <g filter="url(#drop)">
+    <rect x="204" y="452" width="616" height="368" rx="44" fill="#FFFFFF"/>
+  </g>
+  <rect x="204" y="452" width="616" height="122" rx="44" fill="#EDEAF7"/>
+  <rect x="204" y="530" width="616" height="44" fill="#EDEAF7"/>
+
+  <rect x="256" y="500" width="330" height="28" rx="14" fill="#514785"/>
+  <path d="M672 512 l30 30 58 -60" fill="none" stroke="#514785" stroke-width="32"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="256" y="622" width="286" height="28" rx="14" fill="#C9C4DF"/>
+  <rect x="256" y="732" width="352" height="28" rx="14" fill="#C9C4DF"/>
+</svg>
