@@ -4,7 +4,7 @@ class _AnimatedSection extends StatefulWidget {
   final bool expand;
   final VoidCallback animationDismissed;
   final Widget child;
-  final double axisAlignment;
+  final AlignmentGeometry alignment;
   final Duration? duration;
   final Curve? curve;
 
@@ -12,7 +12,7 @@ class _AnimatedSection extends StatefulWidget {
     this.expand = false,
     required this.animationDismissed,
     required this.child,
-    required this.axisAlignment,
+    required this.alignment,
     this.duration,
     this.curve,
   });
@@ -34,15 +34,14 @@ class _AnimatedSectionState extends State<_AnimatedSection>
   }
 
   void prepareAnimations() {
-    animController =
-        AnimationController(
-          vsync: this,
-          duration: widget.duration ?? const Duration(milliseconds: 300),
-        )..addStatusListener((status) {
-          if (status == AnimationStatus.dismissed) {
-            widget.animationDismissed();
-          }
-        });
+    animController = AnimationController(
+      vsync: this,
+      duration: widget.duration ?? const Duration(milliseconds: 300),
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.dismissed) {
+          widget.animationDismissed();
+        }
+      });
 
     animation = CurvedAnimation(
       parent: animController,
@@ -75,7 +74,7 @@ class _AnimatedSectionState extends State<_AnimatedSection>
     return FadeTransition(
       opacity: animation,
       child: SizeTransition(
-        axisAlignment: widget.axisAlignment,
+        alignment: widget.alignment,
         sizeFactor: animation,
         child: widget.child,
       ),

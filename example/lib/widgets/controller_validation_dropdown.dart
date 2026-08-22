@@ -2,8 +2,11 @@ import 'dart:developer';
 
 import 'package:dropdown_flutter/custom_dropdown.dart';
 import 'package:dropdown_flutter_example/model/model.dart';
+import 'package:dropdown_flutter_example/theme.dart';
 import 'package:flutter/material.dart';
 
+/// A [SingleSelectController] lets you read and set the selection from code —
+/// here a clear button wired into the suffix icon.
 class ControllerValidationDropdown extends StatefulWidget {
   const ControllerValidationDropdown({super.key});
 
@@ -15,52 +18,39 @@ class ControllerValidationDropdown extends StatefulWidget {
 class _ControllerValidationDropdownState
     extends State<ControllerValidationDropdown> {
   final formKey = GlobalKey<FormState>();
-  final controller = SingleSelectController<JobType>(jobItems[0]);
+  final controller = SingleSelectController<Member>(members[0]);
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Form(
       key: formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DropdownFlutter<JobType>(
+          DropdownFlutter<Member>(
             controller: controller,
-            hintText: 'Select job role',
-            items: jobItems,
-            onChanged: (value) {
-              log('ControllerValidationDropdown onChanged value: $value');
-            },
-            validator: (value) {
-              if (value == null) {
-                return "Must not be null";
-              }
-              return null;
-            },
-            decoration: CustomDropdownDecoration(
+            hintText: 'Select an owner',
+            items: members,
+            decoration: fieldDecoration(context).copyWith(
               closedSuffixIcon: InkWell(
-                onTap: () {
-                  log('Clearing ControllerValidationDropdown');
-                  controller.clear();
-                },
-                child: const Icon(Icons.close),
+                onTap: controller.clear,
+                child: const Icon(Icons.close, size: 20),
               ),
             ),
+            validator: (value) =>
+                value == null ? 'Please select an owner' : null,
+            onChanged: (value) => log('ControllerValidationDropdown: $value'),
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                if (!formKey.currentState!.validate()) {
-                  return;
-                }
-              },
-              child: const Text(
-                'Submit',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: () => formKey.currentState!.validate(),
+            child: const Text('Submit'),
           ),
         ],
       ),

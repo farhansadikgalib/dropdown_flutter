@@ -7,7 +7,8 @@ void main() {
   const items = ['Apple', 'Banana', 'Cherry'];
 
   Widget wrap(Widget child) => MaterialApp(
-        home: Scaffold(body: Padding(padding: const EdgeInsets.all(16), child: child)),
+        home: Scaffold(
+            body: Padding(padding: const EdgeInsets.all(16), child: child)),
       );
 
   testWidgets('renders hint text when no item is selected', (tester) async {
@@ -220,5 +221,49 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(selected, 'Cherry');
+  });
+
+  testWidgets('selected row stays legible under a dark theme', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(brightness: Brightness.dark),
+        home: Scaffold(
+          body: DropdownFlutter<String>(
+            items: items,
+            initialItem: items.first,
+            excludeSelected: false,
+            hintText: 'h',
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(items.first).first);
+    await tester.pumpAndSettle();
+
+    // The selected row must not fall back to the hardcoded light tint,
+    // which is unreadable on a dark surface.
+    final inkColors = tester
+        .widgetList<Ink>(find.byType(Ink))
+        .map((e) => e.decoration)
+        .whereType<BoxDecoration>()
+        .map((d) => d.color)
+        .toList();
+    expect(inkColors, isNotEmpty);
+    expect(inkColors, isNot(contains(const Color(0xFFF5F5F5))));
+  });
+
+  test('CustomDropdownDecoration.copyWith replaces only given fields', () {
+    const base = CustomDropdownDecoration(
+      closedFillColor: Color(0xFF111111),
+      hintStyle: TextStyle(fontSize: 15),
+    );
+
+    final copy = base.copyWith(hintStyle: const TextStyle(fontSize: 20));
+
+    expect(copy.closedFillColor, const Color(0xFF111111));
+    expect(copy.hintStyle?.fontSize, 20);
+    expect(base.hintStyle?.fontSize, 15);
   });
 }

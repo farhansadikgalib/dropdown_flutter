@@ -8,6 +8,7 @@ class _ItemsList<T> extends StatelessWidget {
   final Function(T) onItemSelect;
   final bool excludeSelected;
   final EdgeInsets itemsListPadding, listItemPadding;
+  final double? listItemHeight;
   final _ListItemBuilder<T> listItemBuilder;
   final ListItemDecoration? decoration;
   final _DropdownType dropdownType;
@@ -23,6 +24,7 @@ class _ItemsList<T> extends StatelessWidget {
     required this.excludeSelected,
     required this.itemsListPadding,
     required this.listItemPadding,
+    required this.listItemHeight,
     required this.listItemBuilder,
     required this.selectedItems,
     required this.decoration,
@@ -30,6 +32,8 @@ class _ItemsList<T> extends StatelessWidget {
     required this.groupHeaderBuilder,
     required this.highlightedRowIndex,
   });
+
+  bool get _hasHeaders => rows.any((r) => r is _HeaderRow<T>);
 
   bool _isSelected(T item) {
     return switch (dropdownType) {
@@ -66,6 +70,11 @@ class _ItemsList<T> extends StatelessWidget {
         controller: scrollController,
         shrinkWrap: true,
         padding: itemsListPadding,
+        // A fixed row height lets the viewport skip measuring every child.
+        // Only safe when there are no group headers, which have their own
+        // intrinsic height.
+        itemExtent:
+            listItemHeight != null && !_hasHeaders ? listItemHeight : null,
         itemCount: rows.length,
         itemBuilder: (_, index) {
           final row = rows[index];
@@ -77,22 +86,30 @@ class _ItemsList<T> extends StatelessWidget {
               final item = row.item;
               final selected = _isSelected(item);
               final highlighted = highlightedRowIndex == index;
+              // Fall back to theme-derived tints so selected/highlighted rows
+              // stay legible under a dark theme too.
+              final scheme = Theme.of(context).colorScheme;
+              final isDark = Theme.of(context).brightness == Brightness.dark;
               final bgColor = highlighted
                   ? (decoration?.highlightedColor ??
-                        ListItemDecoration._defaultHighlightedColor)
+                      (isDark
+                          ? scheme.primary.withValues(alpha: .24)
+                          : ListItemDecoration._defaultHighlightedColor))
                   : selected
-                  ? (decoration?.selectedColor ??
-                        ListItemDecoration._defaultSelectedColor)
-                  : Colors.transparent;
-              return Material(
+                      ? (decoration?.selectedColor ??
+                          (isDark
+                              ? scheme.onSurface.withValues(alpha: .10)
+                              : ListItemDecoration._defaultSelectedColor))
+                      : Colors.transparent;
+              final row_ = Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  splashColor:
-                      decoration?.splashColor ??
+                  splashColor: decoration?.splashColor ??
                       ListItemDecoration._defaultSplashColor,
-                  highlightColor:
-                      decoration?.highlightColor ??
-                      ListItemDecoration._defaultHighlightColor,
+                  highlightColor: decoration?.highlightColor ??
+                      (isDark
+                          ? scheme.onSurface.withValues(alpha: .08)
+                          : ListItemDecoration._defaultHighlightColor),
                   onTap: () => onItemSelect(item),
                   child: Ink(
                     color: bgColor,
@@ -106,6 +123,11 @@ class _ItemsList<T> extends StatelessWidget {
                   ),
                 ),
               );
+              // With headers in the list itemExtent is off, so constrain the
+              // row here instead to keep the requested height.
+              return listItemHeight != null && _hasHeaders
+                  ? SizedBox(height: listItemHeight, child: row_)
+                  : row_;
           }
         },
       ),

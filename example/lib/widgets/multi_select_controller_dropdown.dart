@@ -2,8 +2,11 @@ import 'dart:developer';
 
 import 'package:dropdown_flutter/custom_dropdown.dart';
 import 'package:dropdown_flutter_example/model/model.dart';
+import 'package:dropdown_flutter_example/theme.dart';
 import 'package:flutter/material.dart';
 
+/// A [MultiSelectController] exposes `add`, `remove` and `clear`, so the
+/// selection can be driven from anywhere in your app.
 class MultiSelectControllerDropdown extends StatefulWidget {
   const MultiSelectControllerDropdown({super.key});
 
@@ -14,7 +17,7 @@ class MultiSelectControllerDropdown extends StatefulWidget {
 
 class _MultiSelectControllerDropdownState
     extends State<MultiSelectControllerDropdown> {
-  final controller = MultiSelectController<JobType>([]);
+  final controller = MultiSelectController<Member>([members[0]]);
 
   @override
   void dispose() {
@@ -25,61 +28,40 @@ class _MultiSelectControllerDropdownState
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DropdownFlutter<JobType>.multiSelect(
+        DropdownFlutter<Member>.multiSelect(
           multiSelectController: controller,
-          hintText: 'Select job role',
-          items: jobItems,
-          decoration: CustomDropdownDecoration(
-            closedSuffixIcon: InkWell(
-              onTap: () {
-                log('Clearing MultiSelectControllerDropdown');
-                controller.clear();
-              },
-              child: const Icon(Icons.close),
-            ),
-            expandedSuffixIcon: InkWell(
-              onTap: () {
-                log('Clearing MultiSelectControllerDropdown');
-                controller.clear();
-              },
-              child: const Icon(Icons.close),
-            ),
-          ),
-          onListChanged: (value) {
-            log('MultiSelectControllerDropdown onChanged value: $value');
-          },
+          hintText: 'Assign teammates',
+          items: members,
+          decoration: fieldDecoration(context),
+          onListChanged: (value) =>
+              log('MultiSelectControllerDropdown: $value'),
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              controller.clear();
-            },
-            child: const Text(
-              'Clear',
-              style: TextStyle(fontWeight: FontWeight.w600),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: controller.clear,
+                child: const Text('Clear'),
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              if (controller.value.contains(jobItems[0])) {
-                controller.remove(jobItems[0]);
-              } else {
-                controller.add(jobItems[0]);
-              }
-            },
-            child: const Text(
-              'Toggle first item selection',
-              style: TextStyle(fontWeight: FontWeight.w600),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton(
+                onPressed: () {
+                  final first = members[0];
+                  if (controller.value.contains(first)) {
+                    controller.remove(first);
+                  } else {
+                    controller.add(first);
+                  }
+                },
+                child: const Text('Toggle first'),
+              ),
             ),
-          ),
+          ],
         ),
       ],
     );

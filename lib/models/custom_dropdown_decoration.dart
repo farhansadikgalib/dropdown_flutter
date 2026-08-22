@@ -92,5 +92,60 @@ class CustomDropdownDecoration {
     this.listItemDecoration,
   });
 
+  /// Returns a copy of this decoration with the given fields replaced.
+  ///
+  /// Useful for deriving a one-off variant from a shared base decoration
+  /// without repeating every property.
+  CustomDropdownDecoration copyWith({
+    Color? closedFillColor,
+    Color? expandedFillColor,
+    List<BoxShadow>? closedShadow,
+    List<BoxShadow>? expandedShadow,
+    Widget? closedSuffixIcon,
+    Widget? expandedSuffixIcon,
+    Widget? prefixIcon,
+    BoxBorder? closedBorder,
+    BorderRadius? closedBorderRadius,
+    BoxBorder? closedErrorBorder,
+    BorderRadius? closedErrorBorderRadius,
+    BoxBorder? expandedBorder,
+    BorderRadius? expandedBorderRadius,
+    TextStyle? hintStyle,
+    TextStyle? headerStyle,
+    TextStyle? noResultFoundStyle,
+    TextStyle? errorStyle,
+    TextStyle? listItemStyle,
+    ScrollbarThemeData? overlayScrollbarDecoration,
+    SearchFieldDecoration? searchFieldDecoration,
+    ListItemDecoration? listItemDecoration,
+  }) {
+    return CustomDropdownDecoration(
+      closedFillColor: closedFillColor ?? this.closedFillColor,
+      expandedFillColor: expandedFillColor ?? this.expandedFillColor,
+      closedShadow: closedShadow ?? this.closedShadow,
+      expandedShadow: expandedShadow ?? this.expandedShadow,
+      closedSuffixIcon: closedSuffixIcon ?? this.closedSuffixIcon,
+      expandedSuffixIcon: expandedSuffixIcon ?? this.expandedSuffixIcon,
+      prefixIcon: prefixIcon ?? this.prefixIcon,
+      closedBorder: closedBorder ?? this.closedBorder,
+      closedBorderRadius: closedBorderRadius ?? this.closedBorderRadius,
+      closedErrorBorder: closedErrorBorder ?? this.closedErrorBorder,
+      closedErrorBorderRadius:
+          closedErrorBorderRadius ?? this.closedErrorBorderRadius,
+      expandedBorder: expandedBorder ?? this.expandedBorder,
+      expandedBorderRadius: expandedBorderRadius ?? this.expandedBorderRadius,
+      hintStyle: hintStyle ?? this.hintStyle,
+      headerStyle: headerStyle ?? this.headerStyle,
+      noResultFoundStyle: noResultFoundStyle ?? this.noResultFoundStyle,
+      errorStyle: errorStyle ?? this.errorStyle,
+      listItemStyle: listItemStyle ?? this.listItemStyle,
+      overlayScrollbarDecoration:
+          overlayScrollbarDecoration ?? this.overlayScrollbarDecoration,
+      searchFieldDecoration:
+          searchFieldDecoration ?? this.searchFieldDecoration,
+      listItemDecoration: listItemDecoration ?? this.listItemDecoration,
+    );
+  }
+
   static const Color _defaultFillColor = Colors.white;
 }

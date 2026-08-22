@@ -1,0 +1,15 @@
+# Build output and tooling caches.
+build/
+.dart_tool/
+example/build/
+example/.dart_tool/
+.idea/
+*.iml
+
+# Dev-only tooling: regenerates screenshots and the logo, not needed by users.
+tool/
+screenshots/raw/
+
+# Test scaffolding for the example app.
+example/integration_test/
+example/test_driver/

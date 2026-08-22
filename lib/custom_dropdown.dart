@@ -119,6 +119,14 @@ class DropdownFlutter<T> extends StatefulWidget {
   /// Padding for [DropdownFlutter] each list item.
   final EdgeInsets? listItemPadding;
 
+  /// Fixed height for each item row in the opened dropdown.
+  ///
+  /// When null (the default) every row sizes itself to its content, so a
+  /// custom [listItemBuilder] can be any height. Setting an explicit height
+  /// gives every row the same extent, which also lets the list scroll more
+  /// efficiently because it no longer has to measure each child.
+  final double? listItemHeight;
+
   /// Widget to display while search request loading.
   final Widget? searchRequestLoadingIndicator;
 
@@ -255,6 +263,7 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.expandedHeaderPadding,
     this.itemsListPadding,
     this.listItemPadding,
+    this.listItemHeight,
     this.canCloseOutsideBounds = true,
     this.hideSelectedFieldWhenExpanded = false,
     this.excludeSelected = true,
@@ -273,34 +282,34 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  }) : assert(
-         initialItem == null || controller == null,
-         'Only one of initialItem or controller can be specified at a time',
-       ),
-       assert(
-         initialItem == null || items!.contains(initialItem),
-         'Initial item must match with one of the item in items list.',
-       ),
-       assert(
-         controller == null ||
-             controller.value == null ||
-             items!.contains(controller.value),
-         'Controller value must match with one of the item in items list.',
-       ),
-       _searchType = null,
-       _dropdownType = _DropdownType.singleSelect,
-       futureRequest = null,
-       futureRequestDelay = null,
-       noResultFoundBuilder = null,
-       noResultFoundText = null,
-       searchHintText = null,
-       initialItems = null,
-       onListChanged = null,
-       listValidator = null,
-       headerListBuilder = null,
-       searchRequestLoadingIndicator = null,
-       closeDropDownOnClearFilterSearch = false,
-       multiSelectController = null;
+  })  : assert(
+          initialItem == null || controller == null,
+          'Only one of initialItem or controller can be specified at a time',
+        ),
+        assert(
+          initialItem == null || items!.contains(initialItem),
+          'Initial item must match with one of the item in items list.',
+        ),
+        assert(
+          controller == null ||
+              controller.value == null ||
+              items!.contains(controller.value),
+          'Controller value must match with one of the item in items list.',
+        ),
+        _searchType = null,
+        _dropdownType = _DropdownType.singleSelect,
+        futureRequest = null,
+        futureRequestDelay = null,
+        noResultFoundBuilder = null,
+        noResultFoundText = null,
+        searchHintText = null,
+        initialItems = null,
+        onListChanged = null,
+        listValidator = null,
+        headerListBuilder = null,
+        searchRequestLoadingIndicator = null,
+        closeDropDownOnClearFilterSearch = false,
+        multiSelectController = null;
 
   DropdownFlutter.search({
     super.key,
@@ -327,6 +336,7 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.expandedHeaderPadding,
     this.itemsListPadding,
     this.listItemPadding,
+    this.listItemHeight,
     this.excludeSelected = true,
     this.canCloseOutsideBounds = true,
     this.hideSelectedFieldWhenExpanded = false,
@@ -346,30 +356,30 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  }) : assert(
-         initialItem == null || controller == null,
-         'Only one of initialItem or controller can be specified at a time',
-       ),
-       assert(
-         initialItem == null || items!.contains(initialItem),
-         'Initial item must match with one of the item in items list.',
-       ),
-       assert(
-         controller == null ||
-             controller.value == null ||
-             items!.contains(controller.value),
-         'Controller value must match with one of the item in items list.',
-       ),
-       _searchType = _SearchType.onListData,
-       _dropdownType = _DropdownType.singleSelect,
-       futureRequest = null,
-       futureRequestDelay = null,
-       initialItems = null,
-       onListChanged = null,
-       listValidator = null,
-       headerListBuilder = null,
-       searchRequestLoadingIndicator = null,
-       multiSelectController = null;
+  })  : assert(
+          initialItem == null || controller == null,
+          'Only one of initialItem or controller can be specified at a time',
+        ),
+        assert(
+          initialItem == null || items!.contains(initialItem),
+          'Initial item must match with one of the item in items list.',
+        ),
+        assert(
+          controller == null ||
+              controller.value == null ||
+              items!.contains(controller.value),
+          'Controller value must match with one of the item in items list.',
+        ),
+        _searchType = _SearchType.onListData,
+        _dropdownType = _DropdownType.singleSelect,
+        futureRequest = null,
+        futureRequestDelay = null,
+        initialItems = null,
+        onListChanged = null,
+        listValidator = null,
+        headerListBuilder = null,
+        searchRequestLoadingIndicator = null,
+        multiSelectController = null;
 
   const DropdownFlutter.searchRequest({
     super.key,
@@ -398,6 +408,7 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.expandedHeaderPadding,
     this.itemsListPadding,
     this.listItemPadding,
+    this.listItemHeight,
     this.searchRequestLoadingIndicator,
     this.excludeSelected = true,
     this.canCloseOutsideBounds = true,
@@ -418,17 +429,17 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  }) : assert(
-         initialItem == null || controller == null,
-         'Only one of initialItem or controller can be specified at a time',
-       ),
-       _searchType = _SearchType.onRequestData,
-       _dropdownType = _DropdownType.singleSelect,
-       initialItems = null,
-       onListChanged = null,
-       listValidator = null,
-       headerListBuilder = null,
-       multiSelectController = null;
+  })  : assert(
+          initialItem == null || controller == null,
+          'Only one of initialItem or controller can be specified at a time',
+        ),
+        _searchType = _SearchType.onRequestData,
+        _dropdownType = _DropdownType.singleSelect,
+        initialItems = null,
+        onListChanged = null,
+        listValidator = null,
+        headerListBuilder = null,
+        multiSelectController = null;
 
   DropdownFlutter.multiSelect({
     super.key,
@@ -455,6 +466,7 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.expandedHeaderPadding,
     this.itemsListPadding,
     this.listItemPadding,
+    this.listItemHeight,
     this.enabled = true,
     this.disabledDecoration,
     this.animationDuration,
@@ -470,36 +482,36 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  }) : assert(
-         initialItems == null || multiSelectController == null,
-         'Only one of initialItems or controller can be specified at a time',
-       ),
-       assert(
-         initialItems == null ||
-             initialItems.isEmpty ||
-             initialItems.any((e) => items!.contains(e)),
-         'Initial items must match with the items in the items list.',
-       ),
-       assert(
-         multiSelectController == null ||
-             multiSelectController.value.isEmpty ||
-             multiSelectController.value.any((e) => items!.contains(e)),
-         'Controller value must match with one of the item in items list.',
-       ),
-       _searchType = null,
-       _dropdownType = _DropdownType.multipleSelect,
-       initialItem = null,
-       noResultFoundText = null,
-       validator = null,
-       headerBuilder = null,
-       onChanged = null,
-       excludeSelected = false,
-       futureRequest = null,
-       futureRequestDelay = null,
-       noResultFoundBuilder = null,
-       searchHintText = null,
-       searchRequestLoadingIndicator = null,
-       closeDropDownOnClearFilterSearch = false;
+  })  : assert(
+          initialItems == null || multiSelectController == null,
+          'Only one of initialItems or controller can be specified at a time',
+        ),
+        assert(
+          initialItems == null ||
+              initialItems.isEmpty ||
+              initialItems.any((e) => items!.contains(e)),
+          'Initial items must match with the items in the items list.',
+        ),
+        assert(
+          multiSelectController == null ||
+              multiSelectController.value.isEmpty ||
+              multiSelectController.value.any((e) => items!.contains(e)),
+          'Controller value must match with one of the item in items list.',
+        ),
+        _searchType = null,
+        _dropdownType = _DropdownType.multipleSelect,
+        initialItem = null,
+        noResultFoundText = null,
+        validator = null,
+        headerBuilder = null,
+        onChanged = null,
+        excludeSelected = false,
+        futureRequest = null,
+        futureRequestDelay = null,
+        noResultFoundBuilder = null,
+        searchHintText = null,
+        searchRequestLoadingIndicator = null,
+        closeDropDownOnClearFilterSearch = false;
 
   DropdownFlutter.multiSelectSearch({
     super.key,
@@ -529,6 +541,7 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.expandedHeaderPadding,
     this.itemsListPadding,
     this.listItemPadding,
+    this.listItemHeight,
     this.enabled = true,
     this.disabledDecoration,
     this.closeDropDownOnClearFilterSearch = false,
@@ -545,32 +558,32 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  }) : assert(
-         initialItems == null || multiSelectController == null,
-         'Only one of initialItems or controller can be specified at a time',
-       ),
-       assert(
-         initialItems == null ||
-             initialItems.isEmpty ||
-             initialItems.any((e) => items!.contains(e)),
-         'Initial items must match with the items in the items list.',
-       ),
-       assert(
-         multiSelectController == null ||
-             multiSelectController.value.isEmpty ||
-             multiSelectController.value.any((e) => items!.contains(e)),
-         'Controller value must match with one of the item in items list.',
-       ),
-       _searchType = _SearchType.onListData,
-       _dropdownType = _DropdownType.multipleSelect,
-       initialItem = null,
-       onChanged = null,
-       validator = null,
-       excludeSelected = false,
-       headerBuilder = null,
-       futureRequest = null,
-       futureRequestDelay = null,
-       searchRequestLoadingIndicator = null;
+  })  : assert(
+          initialItems == null || multiSelectController == null,
+          'Only one of initialItems or controller can be specified at a time',
+        ),
+        assert(
+          initialItems == null ||
+              initialItems.isEmpty ||
+              initialItems.any((e) => items!.contains(e)),
+          'Initial items must match with the items in the items list.',
+        ),
+        assert(
+          multiSelectController == null ||
+              multiSelectController.value.isEmpty ||
+              multiSelectController.value.any((e) => items!.contains(e)),
+          'Controller value must match with one of the item in items list.',
+        ),
+        _searchType = _SearchType.onListData,
+        _dropdownType = _DropdownType.multipleSelect,
+        initialItem = null,
+        onChanged = null,
+        validator = null,
+        excludeSelected = false,
+        headerBuilder = null,
+        futureRequest = null,
+        futureRequestDelay = null,
+        searchRequestLoadingIndicator = null;
 
   const DropdownFlutter.multiSelectSearchRequest({
     super.key,
@@ -601,6 +614,7 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.expandedHeaderPadding,
     this.itemsListPadding,
     this.listItemPadding,
+    this.listItemHeight,
     this.canCloseOutsideBounds = true,
     this.hideSelectedFieldWhenExpanded = false,
     this.enabled = true,
@@ -619,17 +633,17 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  }) : assert(
-         initialItems == null || multiSelectController == null,
-         'Only one of initialItems or controller can be specified at a time',
-       ),
-       _searchType = _SearchType.onRequestData,
-       _dropdownType = _DropdownType.multipleSelect,
-       initialItem = null,
-       onChanged = null,
-       headerBuilder = null,
-       excludeSelected = false,
-       validator = null;
+  })  : assert(
+          initialItems == null || multiSelectController == null,
+          'Only one of initialItems or controller can be specified at a time',
+        ),
+        _searchType = _SearchType.onRequestData,
+        _dropdownType = _DropdownType.multipleSelect,
+        initialItem = null,
+        onChanged = null,
+        headerBuilder = null,
+        excludeSelected = false,
+        validator = null;
 
   @override
   State<DropdownFlutter<T>> createState() => _DropdownFlutterState<T>();
@@ -662,8 +676,7 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
     selectedItemNotifier =
         widget.controller ?? SingleSelectController(widget.initialItem);
 
-    selectedItemsNotifier =
-        widget.multiSelectController ??
+    selectedItemsNotifier = widget.multiSelectController ??
         MultiSelectController(widget.initialItems ?? []);
 
     selectedItemNotifier.addListener(() {
@@ -810,6 +823,7 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
                   headerPadding: widget.expandedHeaderPadding,
                   itemsListPadding: widget.itemsListPadding,
                   listItemPadding: widget.listItemPadding,
+                  listItemHeight: widget.listItemHeight,
                   searchRequestLoadingIndicator:
                       widget.searchRequestLoadingIndicator,
                   dropdownType: widget._dropdownType,
@@ -837,13 +851,13 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
                     border: formFieldState.hasError
                         ? (decoration?.closedErrorBorder ?? _defaultErrorBorder)
                         : enabled
-                        ? decoration?.closedBorder
-                        : disabledDecoration?.border,
+                            ? decoration?.closedBorder
+                            : disabledDecoration?.border,
                     borderRadius: formFieldState.hasError
                         ? decoration?.closedErrorBorderRadius
                         : enabled
-                        ? decoration?.closedBorderRadius
-                        : disabledDecoration?.borderRadius,
+                            ? decoration?.closedBorderRadius
+                            : disabledDecoration?.borderRadius,
                     shadow: enabled
                         ? decoration?.closedShadow
                         : disabledDecoration?.shadow,

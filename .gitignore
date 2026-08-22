@@ -73,3 +73,13 @@ build/
 !**/ios/**/default.mode2v3
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
+
+# Claude Code / MCP
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.mcp.json
+.mcp/
+
+# Intermediate device captures; run tool/build_screenshots.py to regenerate
+screenshots/raw/

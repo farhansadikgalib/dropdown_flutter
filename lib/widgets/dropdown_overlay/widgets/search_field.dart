@@ -18,11 +18,11 @@ class _SearchField<T> extends StatefulWidget {
     required this.searchHintText,
     required this.decoration,
     this.onQueryChanged,
-  }) : searchType = _SearchType.onListData,
-       futureRequest = null,
-       futureRequestDelay = null,
-       onFutureRequestLoading = null,
-       mayFoundResult = null;
+  })  : searchType = _SearchType.onListData,
+        futureRequest = null,
+        futureRequestDelay = null,
+        onFutureRequestLoading = null,
+        mayFoundResult = null;
 
   const _SearchField.forRequestData({
     super.key,
@@ -138,27 +138,22 @@ class _SearchFieldState<T> extends State<_SearchField<T>> {
         controller: searchCtrl,
         decoration: InputDecoration(
           filled: true,
-          fillColor:
-              widget.decoration?.fillColor ??
+          fillColor: widget.decoration?.fillColor ??
               SearchFieldDecoration._defaultFillColor,
-          constraints:
-              widget.decoration?.constraints ??
+          constraints: widget.decoration?.constraints ??
               const BoxConstraints.tightFor(height: 40),
           contentPadding:
               widget.decoration?.contentPadding ?? const EdgeInsets.all(8),
           hintText: widget.searchHintText,
           hintStyle: widget.decoration?.hintStyle,
-          prefixIcon:
-              widget.decoration?.prefixIcon ??
+          prefixIcon: widget.decoration?.prefixIcon ??
               const Icon(Icons.search, size: 22),
-          suffixIcon:
-              widget.decoration?.suffixIcon?.call(onClear) ??
+          suffixIcon: widget.decoration?.suffixIcon?.call(onClear) ??
               GestureDetector(
                 onTap: onClear,
                 child: const Icon(Icons.close, size: 20),
               ),
-          border:
-              widget.decoration?.border ??
+          border: widget.decoration?.border ??
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
@@ -166,8 +161,7 @@ class _SearchFieldState<T> extends State<_SearchField<T>> {
                   width: 1,
                 ),
               ),
-          enabledBorder:
-              widget.decoration?.border ??
+          enabledBorder: widget.decoration?.border ??
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
@@ -175,8 +169,7 @@ class _SearchFieldState<T> extends State<_SearchField<T>> {
                   width: 1,
                 ),
               ),
-          focusedBorder:
-              widget.decoration?.focusedBorder ??
+          focusedBorder: widget.decoration?.focusedBorder ??
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(

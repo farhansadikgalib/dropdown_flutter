@@ -33,6 +33,7 @@ class _DropdownOverlay<T> extends StatefulWidget {
   final double? overlayHeight;
   final TextStyle? hintStyle, headerStyle, noResultFoundStyle, listItemStyle;
   final EdgeInsets? headerPadding, listItemPadding, itemsListPadding;
+  final double? listItemHeight;
   final Widget? searchRequestLoadingIndicator;
   final _ListItemBuilder<T>? listItemBuilder;
   final _HeaderBuilder<T>? headerBuilder;
@@ -83,6 +84,7 @@ class _DropdownOverlay<T> extends StatefulWidget {
     required this.headerPadding,
     required this.itemsListPadding,
     required this.listItemPadding,
+    required this.listItemHeight,
     required this.headerBuilder,
     required this.hintBuilder,
     required this.searchType,
@@ -186,8 +188,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
       items != null ? items.join(', ') : item.toString(),
       maxLines: widget.maxLines,
       overflow: TextOverflow.ellipsis,
-      style:
-          widget.headerStyle ??
+      style: widget.headerStyle ??
           const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
     );
   }
@@ -197,8 +198,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
       hint,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style:
-          widget.hintStyle ??
+      style: widget.hintStyle ??
           const TextStyle(fontSize: 16, color: Color(0xFFA7A7A7)),
     );
   }
@@ -382,8 +382,10 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                   onChanged: (_) => toggle(),
                   activeColor:
                       widget.decoration?.listItemDecoration?.selectedIconColor,
-                  side: widget.decoration?.listItemDecoration?.selectedIconBorder,
-                  shape: widget.decoration?.listItemDecoration?.selectedIconShape,
+                  side:
+                      widget.decoration?.listItemDecoration?.selectedIconBorder,
+                  shape:
+                      widget.decoration?.listItemDecoration?.selectedIconShape,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   visualDensity: const VisualDensity(
                     horizontal: VisualDensity.minimumDensity,
@@ -460,14 +462,12 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
     final rows = <_Row<T>>[];
 
     final recentSource = widget.initialRecentItems ?? const [];
-    final showRecents =
-        widget.recentSelectionsMaxCount > 0 &&
+    final showRecents = widget.recentSelectionsMaxCount > 0 &&
         recentSource.isNotEmpty &&
         searchQuery.isEmpty;
     if (showRecents) {
-      final recents = recentSource
-          .where((e) => widget.items.contains(e))
-          .toList();
+      final recents =
+          recentSource.where((e) => widget.items.contains(e)).toList();
       if (recents.isNotEmpty) {
         rows.add(_HeaderRow<T>(_recentSelectionsTitle));
         rows.addAll(recents.map((e) => _ItemRow<T>(e)));
@@ -512,9 +512,8 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
     final overlayOffset = Offset(-12, displayOverlayBottom ? 0 : 64);
 
     // list padding
-    final listPadding = onSearch
-        ? const EdgeInsets.only(top: 8)
-        : EdgeInsets.zero;
+    final listPadding =
+        onSearch ? const EdgeInsets.only(top: 8) : EdgeInsets.zero;
 
     // rows (items + optional group/recent headers)
     final rows = _buildRows();
@@ -530,6 +529,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
             rows: rows,
             itemsListPadding: widget.itemsListPadding ?? listPadding,
             listItemPadding: widget.listItemPadding ?? _defaultListItemPadding,
+            listItemHeight: widget.listItemHeight,
             onItemSelect: onItemSelect,
             decoration: decoration?.listItemDecoration,
             dropdownType: widget.dropdownType,
@@ -537,10 +537,10 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
             highlightedRowIndex: highlightedRowIndex,
           )
         : (mayFoundSearchRequestResult != null &&
-                  !mayFoundSearchRequestResult!) ||
-              widget.searchType == _SearchType.onListData
-        ? noResultFoundBuilder(context)
-        : const SizedBox(height: 12);
+                    !mayFoundSearchRequestResult!) ||
+                widget.searchType == _SearchType.onListData
+            ? noResultFoundBuilder(context)
+            : const SizedBox(height: 12);
 
     final child = Stack(
       children: [
@@ -548,23 +548,20 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
           width: widget.size.width + 24,
           child: CompositedTransformFollower(
             link: widget.layerLink,
-            followerAnchor: displayOverlayBottom
-                ? Alignment.topLeft
-                : Alignment.bottomLeft,
+            followerAnchor:
+                displayOverlayBottom ? Alignment.topLeft : Alignment.bottomLeft,
             showWhenUnlinked: false,
             offset: overlayOffset,
             child: Container(
               key: key1,
               margin: _overlayOuterPadding,
               decoration: BoxDecoration(
-                color:
-                    decoration?.expandedFillColor ??
+                color: decoration?.expandedFillColor ??
                     CustomDropdownDecoration._defaultFillColor,
                 border: decoration?.expandedBorder,
                 borderRadius:
                     decoration?.expandedBorderRadius ?? _defaultBorderRadius,
-                boxShadow:
-                    decoration?.expandedShadow ??
+                boxShadow: decoration?.expandedShadow ??
                     [
                       BoxShadow(
                         blurRadius: 24.0,
@@ -578,7 +575,9 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                 child: _AnimatedSection(
                   animationDismissed: widget.hideOverlay,
                   expand: displayOverly,
-                  axisAlignment: displayOverlayBottom ? 1.0 : -1.0,
+                  alignment: displayOverlayBottom
+                      ? Alignment.bottomCenter
+                      : Alignment.topCenter,
                   duration: widget.animationDuration,
                   curve: widget.animationCurve,
                   child: SizedBox(
@@ -587,10 +586,10 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                         ? widget.overlayHeight ?? (onSearch ? 270 : 225)
                         : null,
                     child: ClipRRect(
-                      borderRadius:
-                          decoration?.expandedBorderRadius ??
+                      borderRadius: decoration?.expandedBorderRadius ??
                           _defaultBorderRadius,
-                      child: NotificationListener<OverscrollIndicatorNotification>(
+                      child:
+                          NotificationListener<OverscrollIndicatorNotification>(
                         onNotification: (notification) {
                           notification.disallowIndicator();
                           return true;
@@ -599,16 +598,16 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                           data: Theme.of(context).copyWith(
                             scrollbarTheme:
                                 decoration?.overlayScrollbarDecoration ??
-                                ScrollbarThemeData(
-                                  thumbVisibility: WidgetStateProperty.all(
-                                    true,
-                                  ),
-                                  thickness: WidgetStateProperty.all(5),
-                                  radius: const Radius.circular(4),
-                                  thumbColor: WidgetStateProperty.all(
-                                    Colors.grey[300],
-                                  ),
-                                ),
+                                    ScrollbarThemeData(
+                                      thumbVisibility: WidgetStateProperty.all(
+                                        true,
+                                      ),
+                                      thickness: WidgetStateProperty.all(5),
+                                      radius: const Radius.circular(4),
+                                      thumbColor: WidgetStateProperty.all(
+                                        Colors.grey[300],
+                                      ),
+                                    ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -621,8 +620,7 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                     setState(() => displayOverly = false);
                                   },
                                   child: Padding(
-                                    padding:
-                                        widget.headerPadding ??
+                                    padding: widget.headerPadding ??
                                         _defaultHeaderPadding,
                                     child: Row(
                                       children: [
@@ -744,7 +742,8 @@ class _DropdownOverlayState<T> extends State<_DropdownOverlay<T>> {
                                             const SizedBox(width: 12),
                                           ],
                                           Expanded(
-                                            child: _SearchField<T>.forRequestData(
+                                            child:
+                                                _SearchField<T>.forRequestData(
                                               items: widget.items,
                                               searchHintText:
                                                   widget.searchHintText,

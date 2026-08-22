@@ -2,8 +2,10 @@ import 'dart:developer';
 
 import 'package:dropdown_flutter/custom_dropdown.dart';
 import 'package:dropdown_flutter_example/model/model.dart';
+import 'package:dropdown_flutter_example/theme.dart';
 import 'package:flutter/material.dart';
 
+/// Works inside a [Form]: `validator` runs on submit like any form field.
 class ValidationDropdown extends StatelessWidget {
   ValidationDropdown({super.key});
 
@@ -14,36 +16,21 @@ class ValidationDropdown extends StatelessWidget {
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DropdownFlutter<JobType>(
-            hintText: 'Select job role',
-            items: jobItems,
+          DropdownFlutter<Member>(
+            hintText: 'Select a reviewer',
+            items: members,
             excludeSelected: false,
-            onChanged: (value) {
-              log('ValidationDropdown onChanged value: $value');
-            },
-            validator: (value) {
-              if (value == null) {
-                return "Must not be null";
-              }
-              return null;
-            },
+            decoration: fieldDecoration(context),
+            validator: (value) =>
+                value == null ? 'Please select a reviewer' : null,
+            onChanged: (value) => log('ValidationDropdown: $value'),
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                if (!_formKey.currentState!.validate()) {
-                  return;
-                }
-              },
-              child: const Text(
-                'Submit',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: () => _formKey.currentState!.validate(),
+            child: const Text('Submit'),
           ),
         ],
       ),
@@ -51,8 +38,10 @@ class ValidationDropdown extends StatelessWidget {
   }
 }
 
+/// Multi-select uses `listValidator` instead of `validator`.
 class MultiSelectValidationDropdown extends StatelessWidget {
   MultiSelectValidationDropdown({super.key});
+
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -60,35 +49,21 @@ class MultiSelectValidationDropdown extends StatelessWidget {
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DropdownFlutter<JobType>.multiSelect(
-            hintText: 'Select job role',
-            items: jobItems,
-            onListChanged: (value) {
-              log('MultiSelectValidationDropdown onChanged value: $value');
-            },
-            listValidator: (value) {
-              if (value.isEmpty) {
-                return "Must not be null";
-              }
-              return null;
-            },
+          DropdownFlutter<Member>.multiSelect(
+            hintText: 'Select reviewers',
+            items: members,
+            decoration: fieldDecoration(context),
+            listValidator: (value) =>
+                value.isEmpty ? 'Please select at least one reviewer' : null,
+            onListChanged: (value) =>
+                log('MultiSelectValidationDropdown: $value'),
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                if (!_formKey.currentState!.validate()) {
-                  return;
-                }
-              },
-              child: const Text(
-                'Submit',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: () => _formKey.currentState!.validate(),
+            child: const Text('Submit'),
           ),
         ],
       ),
