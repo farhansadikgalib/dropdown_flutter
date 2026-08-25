@@ -1,7 +1,7 @@
 name: dropdown_flutter
 description: A Flutter package designed to enhance your app with customizable dropdowns, featuring list data search, network search, and multi-selection.
 
-version: 1.2.0
+version: 1.2.1
 homepage: https://farhansadikgalib.com
 repository: https://github.com/farhansadikgalib/dropdown_flutter
 issue_tracker: https://github.com/farhansadikgalib/dropdown_flutter/issues

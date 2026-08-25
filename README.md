@@ -19,7 +19,7 @@
 
 ```yaml
 dependencies:
-  dropdown_flutter: ^1.2.0
+  dropdown_flutter: ^1.2.1
 ```
 
 ```dart

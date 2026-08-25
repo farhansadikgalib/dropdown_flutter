@@ -1,3 +1,25 @@
+# 1.2.1
+
+**Fixed**
+
+- The listener attached to an app-supplied `SingleSelectController` /
+  `MultiSelectController` in `initState` is now removed in `dispose`.
+  Previously it outlived the widget, so the next value change called
+  `FormFieldState.didChange` -> `setState` on an unmounted state and crashed
+  with "Null check operator used on a null value", after first running
+  `onChanged` for a screen that no longer existed.
+- Swapping in a different controller instance via `didUpdateWidget` now moves
+  the listener to the new controller. Previously the listener stayed on the
+  old instance, silently disabling `onChanged`, form `didChange` and
+  `validateOnChange` from then on.
+- The listener bodies guard on `mounted` (and the form field's `mounted`), so
+  a notification arriving mid-teardown cannot touch a dead state.
+- The post-frame writes for `initialItem` / `initialItems` changes skip when
+  the state was disposed before the frame ended.
+
+Covered by `test/listener_lifecycle_test.dart`, which reproduces the crash and
+the stranded-listener cases.
+
 # 1.2.0
 
 Everything since 1.1.0 — 1.1.1 was prepared but never published, so its fixes

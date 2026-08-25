@@ -656,6 +656,13 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
   late List<T> _recentItems;
   FormFieldState<(T?, List<T>)>? _formFieldState;
 
+  // Named so they can be detached again: an app-supplied controller outlives
+  // this state, and a listener left behind would call setState on unmounted
+  // states ("Null check operator used on a null value") and run onChanged for
+  // a screen that no longer exists.
+  late final VoidCallback _selectedItemListener;
+  late final VoidCallback _selectedItemsListener;
+
   void _registerRecent(T value) {
     if (widget.recentSelectionsMaxCount <= 0) return;
     final updated = List<T>.of(_recentItems)..remove(value);
@@ -679,21 +686,32 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
     selectedItemsNotifier = widget.multiSelectController ??
         MultiSelectController(widget.initialItems ?? []);
 
-    selectedItemNotifier.addListener(() {
+    _selectedItemListener = () {
+      // The notifier can fire while this state is being torn down (or, for a
+      // shared controller, from another widget entirely); a dead state must
+      // not run callbacks or touch its form field.
+      if (!mounted) return;
       widget.onChanged?.call(selectedItemNotifier.value);
-      _formFieldState?.didChange((selectedItemNotifier.value, []));
+      final formFieldState = _formFieldState;
+      if (formFieldState == null || !formFieldState.mounted) return;
+      formFieldState.didChange((selectedItemNotifier.value, []));
       if (widget.validateOnChange) {
-        _formFieldState?.validate();
+        formFieldState.validate();
       }
-    });
+    };
+    selectedItemNotifier.addListener(_selectedItemListener);
 
-    selectedItemsNotifier.addListener(() {
+    _selectedItemsListener = () {
+      if (!mounted) return;
       widget.onListChanged?.call(selectedItemsNotifier.value);
-      _formFieldState?.didChange((null, selectedItemsNotifier.value));
+      final formFieldState = _formFieldState;
+      if (formFieldState == null || !formFieldState.mounted) return;
+      formFieldState.didChange((null, selectedItemsNotifier.value));
       if (widget.validateOnChange) {
-        _formFieldState?.validate();
+        formFieldState.validate();
       }
-    });
+    };
+    selectedItemsNotifier.addListener(_selectedItemsListener);
   }
 
   @override
@@ -703,6 +721,9 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
     if (widget.initialItem != oldWidget.initialItem &&
         selectedItemNotifier.value != widget.initialItem) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
+        // The state (and with it an implicit controller) may be gone by the
+        // time the frame ends.
+        if (!mounted) return;
         selectedItemNotifier.value = widget.initialItem;
       });
     }
@@ -710,23 +731,38 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
     if (widget.initialItems != oldWidget.initialItems &&
         selectedItemsNotifier.value != widget.initialItems) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         selectedItemsNotifier.value = widget.initialItems ?? [];
       });
     }
 
     if (widget.controller != oldWidget.controller &&
         widget.controller != null) {
+      // Move the listener with the controller: leaving it on the old
+      // instance both strands it there and leaves the new controller
+      // without one, silently disabling onChanged and form updates.
+      selectedItemNotifier.removeListener(_selectedItemListener);
       selectedItemNotifier = widget.controller!;
+      selectedItemNotifier.addListener(_selectedItemListener);
     }
 
     if (widget.multiSelectController != oldWidget.multiSelectController &&
         widget.multiSelectController != null) {
+      selectedItemsNotifier.removeListener(_selectedItemsListener);
       selectedItemsNotifier = widget.multiSelectController!;
+      selectedItemsNotifier.addListener(_selectedItemsListener);
     }
   }
 
   @override
   void dispose() {
+    // Always detach, not only from implicit controllers: an app-supplied
+    // controller outlives this state, and the listener left on it was the
+    // "Null check operator used on a null value" crash in FormFieldState
+    // .didChange -> setState after this state was unmounted.
+    selectedItemNotifier.removeListener(_selectedItemListener);
+    selectedItemsNotifier.removeListener(_selectedItemsListener);
+
     if (widget.controller == null) {
       selectedItemNotifier.dispose();
     }
