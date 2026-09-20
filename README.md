@@ -275,9 +275,4 @@ CI checks the minimum supported Flutter version and stable Flutter.
   <img src="https://img.shields.io/badge/pub.dev-packages-0553B1?style=for-the-badge&logo=dart&logoColor=white" alt="pub.dev"/>
 </a>
 
-If this package saved you time, consider starring the repo ⭐
-
-See the [changelog](CHANGELOG.md) for release notes.
-Released under the [MIT License](LICENSE).
-
 </div>
