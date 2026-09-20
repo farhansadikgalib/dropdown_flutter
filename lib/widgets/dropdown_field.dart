@@ -8,6 +8,7 @@ const _defaultOverlayIconDown = Icon(
 
 class _DropDownField<T> extends StatefulWidget {
   final VoidCallback onTap;
+  final FocusNode focusNode;
   final SingleSelectController<T?> selectedItemNotifier;
   final String hintText;
   final Color? fillColor;
@@ -18,9 +19,9 @@ class _DropDownField<T> extends StatefulWidget {
   final List<BoxShadow>? shadow;
   final EdgeInsets? headerPadding;
   final int maxLines;
-  final _HeaderBuilder<T>? headerBuilder;
-  final _HeaderListBuilder<T>? headerListBuilder;
-  final _HintBuilder? hintBuilder;
+  final DropdownHeaderBuilder<T>? headerBuilder;
+  final DropdownHeaderListBuilder<T>? headerListBuilder;
+  final DropdownHintBuilder? hintBuilder;
   final _DropdownType dropdownType;
   final bool enabled;
   final bool enableHapticFeedback;
@@ -29,6 +30,7 @@ class _DropDownField<T> extends StatefulWidget {
   const _DropDownField({
     super.key,
     required this.onTap,
+    required this.focusNode,
     required this.selectedItemNotifier,
     required this.maxLines,
     required this.dropdownType,
@@ -92,7 +94,7 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
           TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: widget.enabled ? null : Colors.black.withValues(alpha: .5),
+            color: widget.enabled ? null : Theme.of(context).disabledColor,
           ),
     );
   }
@@ -103,7 +105,9 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: widget.hintStyle ??
-          const TextStyle(fontSize: 16, color: Color(0xFFA7A7A7)),
+          TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant),
     );
   }
 
@@ -120,52 +124,62 @@ class _DropDownFieldState<T> extends State<_DropDownField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (widget.enableHapticFeedback) {
-          HapticFeedback.lightImpact();
-        }
-        widget.onTap();
-      },
-      child: Container(
-        padding: widget.headerPadding ?? _defaultHeaderPadding,
-        decoration: BoxDecoration(
-          color: widget.fillColor ??
-              (widget.enabled
-                  ? CustomDropdownDecoration._defaultFillColor
-                  : CustomDropdownDecoration._defaultFillColor.withValues(
-                      alpha: .5,
-                    )),
-          border: widget.border,
-          borderRadius: widget.borderRadius ?? _defaultBorderRadius,
-          boxShadow: widget.shadow,
-        ),
-        child: Row(
-          children: [
-            if (widget.prefixIcon != null) ...[
-              widget.prefixIcon!,
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              child: switch (widget.dropdownType) {
-                _DropdownType.singleSelect => selectedItem != null
-                    ? headerBuilder(context)
-                    : hintBuilder(context),
-                _DropdownType.multipleSelect => selectedItems.isNotEmpty
-                    ? headerListBuilder(context)
-                    : hintBuilder(context),
-              },
-            ),
-            const SizedBox(width: 12),
-            widget.suffixIcon ??
+    void activate() {
+      if (!widget.enabled) return;
+      if (widget.enableHapticFeedback) {
+        HapticFeedback.lightImpact();
+      }
+      widget.onTap();
+    }
+
+    return Semantics(
+      button: true,
+      enabled: widget.enabled,
+      child: InkWell(
+        focusNode: widget.focusNode,
+        onTap: widget.enabled ? activate : null,
+        canRequestFocus: widget.enabled,
+        borderRadius: widget.borderRadius ?? _defaultBorderRadius,
+        child: Container(
+          padding: widget.headerPadding ?? _defaultHeaderPadding,
+          decoration: BoxDecoration(
+            color: widget.fillColor ??
                 (widget.enabled
-                    ? _defaultOverlayIconDown
-                    : Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: Colors.black.withValues(alpha: .5),
-                        size: 20,
-                      )),
-          ],
+                    ? Theme.of(context).colorScheme.surface
+                    : Theme.of(context).colorScheme.surface.withValues(
+                          alpha: .5,
+                        )),
+            border: widget.border,
+            borderRadius: widget.borderRadius ?? _defaultBorderRadius,
+            boxShadow: widget.shadow,
+          ),
+          child: Row(
+            children: [
+              if (widget.prefixIcon != null) ...[
+                widget.prefixIcon!,
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: switch (widget.dropdownType) {
+                  _DropdownType.singleSelect => selectedItem != null
+                      ? headerBuilder(context)
+                      : hintBuilder(context),
+                  _DropdownType.multipleSelect => selectedItems.isNotEmpty
+                      ? headerListBuilder(context)
+                      : hintBuilder(context),
+                },
+              ),
+              const SizedBox(width: 12),
+              widget.suffixIcon ??
+                  (widget.enabled
+                      ? _defaultOverlayIconDown
+                      : Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Theme.of(context).disabledColor,
+                          size: 20,
+                        )),
+            ],
+          ),
         ),
       ),
     );

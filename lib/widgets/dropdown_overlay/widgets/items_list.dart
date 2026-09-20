@@ -5,14 +5,15 @@ class _ItemsList<T> extends StatelessWidget {
   final T? selectedItem;
   final List<T> selectedItems;
   final List<_Row<T>> rows;
+  final Map<int, GlobalKey>? rowKeys;
   final Function(T) onItemSelect;
   final bool excludeSelected;
   final EdgeInsets itemsListPadding, listItemPadding;
   final double? listItemHeight;
-  final _ListItemBuilder<T> listItemBuilder;
+  final DropdownListItemBuilder<T> listItemBuilder;
   final ListItemDecoration? decoration;
   final _DropdownType dropdownType;
-  final _GroupHeaderBuilder? groupHeaderBuilder;
+  final DropdownGroupHeaderBuilder? groupHeaderBuilder;
   final int? highlightedRowIndex;
 
   const _ItemsList({
@@ -20,6 +21,7 @@ class _ItemsList<T> extends StatelessWidget {
     required this.scrollController,
     required this.selectedItem,
     required this.rows,
+    this.rowKeys,
     required this.onItemSelect,
     required this.excludeSelected,
     required this.itemsListPadding,
@@ -47,14 +49,16 @@ class _ItemsList<T> extends StatelessWidget {
       padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 4),
       child: Row(
         children: [
-          Text(
+          Flexible(
+              child: Text(
             label,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-          ),
+          )),
           const SizedBox(width: 8),
           Expanded(child: Divider(height: 1, color: Colors.grey[300])),
         ],
@@ -125,9 +129,14 @@ class _ItemsList<T> extends StatelessWidget {
               );
               // With headers in the list itemExtent is off, so constrain the
               // row here instead to keep the requested height.
-              return listItemHeight != null && _hasHeaders
+              final sizedRow = listItemHeight != null && _hasHeaders
                   ? SizedBox(height: listItemHeight, child: row_)
                   : row_;
+              return rowKeys == null
+                  ? sizedRow
+                  : KeyedSubtree(
+                      key: rowKeys!.putIfAbsent(index, GlobalKey.new),
+                      child: sizedRow);
           }
         },
       ),

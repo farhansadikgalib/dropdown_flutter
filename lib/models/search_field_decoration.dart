@@ -1,9 +1,10 @@
 part of '../custom_dropdown.dart';
 
+/// Appearance and layout overrides for the dropdown search input.
 class SearchFieldDecoration {
   /// Fill color for [DropdownFlutter] search field.
   ///
-  /// Default to Color(0xFFFAFAFA).
+  /// Defaults to the ambient color scheme surfaceContainerHighest.
   final Color? fillColor;
 
   /// Layout constraints for [DropdownFlutter] search field.
@@ -31,6 +32,7 @@ class SearchFieldDecoration {
   /// Focused border for [DropdownFlutter] search field.
   final InputBorder? focusedBorder;
 
+  /// Creates styling overrides for the search input.
   const SearchFieldDecoration({
     this.fillColor,
     this.constraints,
@@ -42,6 +44,4 @@ class SearchFieldDecoration {
     this.border,
     this.focusedBorder,
   });
-
-  static const _defaultFillColor = Color(0xFFFAFAFA);
 }

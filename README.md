@@ -17,13 +17,16 @@
 
 ## Install
 
+Requires Flutter **3.27+** and Dart **3.6+**. The original
+`custom_dropdown.dart` import remains supported.
+
 ```yaml
 dependencies:
-  dropdown_flutter: ^1.2.1
+  dropdown_flutter: ^1.3.0
 ```
 
 ```dart
-import 'package:dropdown_flutter/custom_dropdown.dart';
+import 'package:dropdown_flutter/dropdown_flutter.dart';
 
 DropdownFlutter<String>(
   hintText: 'Select priority',
@@ -46,7 +49,8 @@ That is the whole setup — no builders, controllers or config required.
 | `.multiSelectSearch()` | Multi-select over a filtered local list |
 | `.multiSelectSearchRequest()` | Multi-select over API results |
 
-Swap the constructor and keep the rest — every option below applies to all six.
+Choose the constructor for your data source and selection mode. Search options
+apply to search constructors; select-all and list validation apply to multi-select.
 The `multiSelect*` variants report through `onListChanged`; the rest use
 `onChanged`.
 
@@ -69,6 +73,10 @@ Plain `String` items search out of the box. For your own type, mix in
 
 ```dart
 class Member with CustomDropdownListFilter {
+  const Member(this.name, this.role);
+  final String name;
+  final String role;
+
   // toString() supplies the row label; filter() decides what matches.
   @override
   String toString() => name;
@@ -130,7 +138,11 @@ DropdownFlutter<Member>(
 
 ## Modern UX
 
-All opt-in and **off by default**, so upgrading changes nothing.
+The features below are opt-in. Default surfaces and text follow the app theme;
+fields support Tab focus and Enter/Space activation. Escape dismisses a menu and
+returns focus to the field. Multi-select menus include a selection count and
+Done button by default; choices are applied immediately, and Done closes the menu.
+Use `doneText` to localize its label or `showMultiSelectFooter: false` to hide it.
 
 | Property | Effect |
 | --- | --- |
@@ -175,7 +187,58 @@ final withIcon = base.copyWith(prefixIcon: const Icon(Icons.person));
 
 Size is controlled by `overlayHeight`, `listItemPadding` and `listItemHeight`
 — the last defaults to null so rows fit their content; setting it lets the list
-scroll more efficiently.
+scroll more efficiently. Menus also respect available viewport space and keyboard
+insets, including short lists with tall custom rows.
+
+## State and lifecycle
+
+- Create controllers once in `State`, and dispose them in your `dispose()` method.
+  The dropdown only disposes controllers it creates itself. Controllers may be
+  replaced or removed during rebuilds.
+- `initialItem` / `initialItems` seed an uncontrolled dropdown. Changing these
+  properties resets its selection; with a controller, set `controller.value`.
+  Do not supply both a controller and initial selection.
+- Multi-select values are immutable, duplicate-free snapshots. Use `add`, `remove`,
+  `clear`, or assign a new list to `value`; do not mutate `controller.value`.
+- Local initial selections must all belong to `items`. Custom objects should
+  implement consistent `==` and `hashCode`. Replace item lists when data changes.
+  If a selected item is removed, clear/update the controller explicitly.
+- `FormState.reset()` restores the initial selection (or the value present when
+  a controller was attached) and clears errors. Disabled fields do not validate.
+- Select-all acts on the current filtered/fetched results, preserving selections
+  outside those results. Clear-all removes only the current results.
+- Network search runs for nonempty queries. Clearing cancels pending debounce
+  timers and restores the supplied seed `items`. Old requests may finish, but
+  cannot overwrite newer results or update a disposed dropdown. Before typing,
+  an empty remote menu shows `searchHintText` instead of a no-results message.
+  Failed requests show a Retry action that repeats the current query. Customize
+  or localize this state with `searchRequestErrorBuilder(context, error, retry)`;
+  raw exception details are not displayed by the default UI.
+- `closeDropDownOnClearFilterSearch` closes the menu when its clear button is used.
+  Reduced-motion settings skip the menu animation.
+- Builder callbacks have public types such as `DropdownListItemBuilder<T>` and
+  `DropdownHeaderBuilder<T>` for reusable builders.
+
+## Development
+
+```sh
+flutter pub get
+flutter analyze
+flutter test
+cd example
+flutter test
+```
+
+Run the package regression/UX suites and example gallery together on an Android
+emulator (from `example/`):
+
+```sh
+flutter emulators --launch <emulator-id>
+flutter test integration_test/dropdown_flutter_test.dart -d <device-id>
+```
+
+Use `flutter emulators` and `flutter devices` to find the IDs.
+CI checks the minimum supported Flutter version and stable Flutter.
 
 ## All properties
 
@@ -186,7 +249,8 @@ scroll more efficiently.
 | **Sizing** | `listItemHeight`, `overlayHeight`, `listItemPadding` / `itemsListPadding`, `closedHeaderPadding` / `expandedHeaderPadding` |
 | **Behaviour** | `enabled`, `canCloseOutsideBounds`, `hideSelectedFieldWhenExpanded`, `closeDropDownOnClearFilterSearch`, `visibility` |
 | **Control** | `controller` / `multiSelectController`, `overlayController`, `itemsScrollController` |
-| **Async** | `futureRequest` / `futureRequestDelay`, `searchRequestLoadingIndicator` |
+| **Async** | `futureRequest` / `futureRequestDelay`, `searchRequestLoadingIndicator`, `searchRequestErrorBuilder` |
+| **Completion** | `showMultiSelectFooter`, `doneText` |
 | **Recents** | `initialRecentItems`, `onRecentItemsChanged` |
 | **Validation** | `validator` / `listValidator`, `validateOnChange` |
 | **Appearance** | `decoration` / `disabledDecoration` |

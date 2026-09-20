@@ -1,0 +1,30 @@
+name: Flutter checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter: ['3.27.4', 'stable']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ matrix.flutter == 'stable' && '' || matrix.flutter }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test example/lib example/test example/integration_test
+        if: matrix.flutter == 'stable'
+      - run: flutter analyze
+      - run: flutter test --coverage
+      - run: flutter test
+        working-directory: example

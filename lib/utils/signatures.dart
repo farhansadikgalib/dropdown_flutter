@@ -1,20 +1,31 @@
 part of '../custom_dropdown.dart';
 
-typedef _ListItemBuilder<T> = Widget Function(
+/// Builds a selectable row, including any custom selection control.
+typedef DropdownListItemBuilder<T> = Widget Function(
   BuildContext context,
   T item,
   bool isSelected,
   VoidCallback onItemSelect,
 );
-typedef _HeaderBuilder<T> = Widget Function(
+
+/// Builds the header for a selected single item.
+typedef DropdownHeaderBuilder<T> = Widget Function(
     BuildContext context, T selectedItem, bool enabled);
-typedef _HeaderListBuilder<T> = Widget Function(
+
+/// Builds the header for a list of selected items.
+typedef DropdownHeaderListBuilder<T> = Widget Function(
     BuildContext context, List<T> selectedItems, bool enabled);
-typedef _HintBuilder = Widget Function(
+
+/// Builds the placeholder displayed when no item is selected.
+typedef DropdownHintBuilder = Widget Function(
     BuildContext context, String hint, bool enabled);
-typedef _NoResultFoundBuilder = Widget Function(
+
+/// Builds the message displayed for an empty result set.
+typedef DropdownNoResultFoundBuilder = Widget Function(
     BuildContext context, String text);
-typedef _GroupHeaderBuilder = Widget Function(
+
+/// Builds a section heading for a group of items.
+typedef DropdownGroupHeaderBuilder = Widget Function(
     BuildContext context, String group);
 
 /// Internal row model for the overlay list. Lets the list interleave section
@@ -33,3 +44,7 @@ class _HeaderRow<T> extends _Row<T> {
   final String label;
   const _HeaderRow(this.label);
 }
+
+/// Builds a recoverable remote-search error without exposing raw errors by default.
+typedef DropdownSearchErrorBuilder = Widget Function(
+    BuildContext context, Object error, VoidCallback retry);

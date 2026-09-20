@@ -1,10 +1,12 @@
+/// Searchable, theme-aware single and multi-select dropdown widgets.
+library;
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-
-export 'custom_dropdown.dart';
 
 part 'models/controllers.dart';
 // models
@@ -42,6 +44,7 @@ const _defaultErrorStyle = TextStyle(
   height: 0.5,
 );
 
+/// A dropdown with local or remote search, form validation, and selection controllers.
 class DropdownFlutter<T> extends StatefulWidget {
   /// The list of items user can select.
   final List<T>? items;
@@ -131,23 +134,23 @@ class DropdownFlutter<T> extends StatefulWidget {
   final Widget? searchRequestLoadingIndicator;
 
   /// [DropdownFlutter] opened/expanded area height.
-  /// Only applicable if items are greater than 4 otherwise adjust automatically.
+  /// Maximum menu height, further constrained to the available viewport.
   final double? overlayHeight;
 
   /// The [listItemBuilder] that will be used to build item on demand.
-  final _ListItemBuilder<T>? listItemBuilder;
+  final DropdownListItemBuilder<T>? listItemBuilder;
 
   /// The [headerBuilder] that will be used to build [DropdownFlutter] header field.
-  final _HeaderBuilder<T>? headerBuilder;
+  final DropdownHeaderBuilder<T>? headerBuilder;
 
   /// The [hintBuilder] that will be used to build [DropdownFlutter] hint of header field.
-  final _HintBuilder? hintBuilder;
+  final DropdownHintBuilder? hintBuilder;
 
   /// The [noResultFoundBuilder] that will be used to build area when there's no search results match.
-  final _NoResultFoundBuilder? noResultFoundBuilder;
+  final DropdownNoResultFoundBuilder? noResultFoundBuilder;
 
   /// The [headerListBuilder] that will be used to build [DropdownFlutter] header field.
-  final _HeaderListBuilder<T>? headerListBuilder;
+  final DropdownHeaderListBuilder<T>? headerListBuilder;
 
   /// [DropdownFlutter] decoration.
   /// Contain sub-decorations [SearchFieldDecoration], [ListItemDecoration] and [ScrollbarThemeData].
@@ -172,13 +175,13 @@ class DropdownFlutter<T> extends StatefulWidget {
   /// The [controller] that can be used to control [DropdownFlutter] selected item.
   final SingleSelectController<T?>? controller;
 
-  /// The [multiSelectController] that can be used to control [CustomDropdown.multiSelect] selected items.
+  /// The [multiSelectController] that can be used to control [DropdownFlutter.multiSelect] selected items.
   final MultiSelectController<T>? multiSelectController;
 
   /// Callback for dropdown [visibility].
   ///
   /// If both [visibility] and [overlayController] are provided, this callback never listens the changes of [overlayController].
-  /// You have to explicitly check for [overlayController] visibility states using [overlayController.isShowing] property.
+  /// You have to explicitly check for [overlayController] visibility states using [OverlayPortalController.isShowing] property.
   final Function(bool)? visibility;
 
   final _SearchType? _searchType;
@@ -206,7 +209,7 @@ class DropdownFlutter<T> extends StatefulWidget {
   final String Function(T item)? groupBy;
 
   /// Builds a custom header for a group produced by [groupBy].
-  final _GroupHeaderBuilder? groupHeaderBuilder;
+  final DropdownGroupHeaderBuilder? groupHeaderBuilder;
 
   /// Maximum number of recently-selected items pinned at the top of the list.
   ///
@@ -241,6 +244,17 @@ class DropdownFlutter<T> extends StatefulWidget {
   /// Label for the clear-all action. Defaults to "Clear all".
   final String? clearAllText;
 
+  /// Builds the request failure state. Call retry to repeat the current query.
+  /// By default, shows a short error message and a Retry button.
+  final DropdownSearchErrorBuilder? searchRequestErrorBuilder;
+
+  /// Show a selection count and Done action in multi-select menus.
+  final bool showMultiSelectFooter;
+
+  /// Label for the multi-select completion action. Defaults to "Done".
+  final String? doneText;
+
+  /// Creates a single-select dropdown from a local list.
   DropdownFlutter({
     super.key,
     required this.items,
@@ -282,18 +296,25 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  })  : assert(
+    this.searchRequestErrorBuilder,
+    this.showMultiSelectFooter = true,
+    this.doneText,
+  })  : assert(maxlines > 0),
+        assert(recentSelectionsMaxCount >= 0),
+        assert(listItemHeight == null || listItemHeight > 0),
+        assert(overlayHeight == null || overlayHeight > 0),
+        assert(
           initialItem == null || controller == null,
           'Only one of initialItem or controller can be specified at a time',
         ),
         assert(
-          initialItem == null || items!.contains(initialItem),
+          initialItem == null || (items ?? const []).contains(initialItem),
           'Initial item must match with one of the item in items list.',
         ),
         assert(
           controller == null ||
               controller.value == null ||
-              items!.contains(controller.value),
+              (items ?? const []).contains(controller.value),
           'Controller value must match with one of the item in items list.',
         ),
         _searchType = null,
@@ -311,6 +332,7 @@ class DropdownFlutter<T> extends StatefulWidget {
         closeDropDownOnClearFilterSearch = false,
         multiSelectController = null;
 
+  /// Creates a single-select dropdown with local list filtering.
   DropdownFlutter.search({
     super.key,
     required this.items,
@@ -356,18 +378,25 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  })  : assert(
+    this.searchRequestErrorBuilder,
+    this.showMultiSelectFooter = true,
+    this.doneText,
+  })  : assert(maxlines > 0),
+        assert(recentSelectionsMaxCount >= 0),
+        assert(listItemHeight == null || listItemHeight > 0),
+        assert(overlayHeight == null || overlayHeight > 0),
+        assert(
           initialItem == null || controller == null,
           'Only one of initialItem or controller can be specified at a time',
         ),
         assert(
-          initialItem == null || items!.contains(initialItem),
+          initialItem == null || (items ?? const []).contains(initialItem),
           'Initial item must match with one of the item in items list.',
         ),
         assert(
           controller == null ||
               controller.value == null ||
-              items!.contains(controller.value),
+              (items ?? const []).contains(controller.value),
           'Controller value must match with one of the item in items list.',
         ),
         _searchType = _SearchType.onListData,
@@ -381,6 +410,7 @@ class DropdownFlutter<T> extends StatefulWidget {
         searchRequestLoadingIndicator = null,
         multiSelectController = null;
 
+  /// Creates a single-select dropdown that fetches nonempty search queries.
   const DropdownFlutter.searchRequest({
     super.key,
     required this.futureRequest,
@@ -429,7 +459,14 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  })  : assert(
+    this.searchRequestErrorBuilder,
+    this.showMultiSelectFooter = true,
+    this.doneText,
+  })  : assert(maxlines > 0),
+        assert(recentSelectionsMaxCount >= 0),
+        assert(listItemHeight == null || listItemHeight > 0),
+        assert(overlayHeight == null || overlayHeight > 0),
+        assert(
           initialItem == null || controller == null,
           'Only one of initialItem or controller can be specified at a time',
         ),
@@ -441,6 +478,7 @@ class DropdownFlutter<T> extends StatefulWidget {
         headerListBuilder = null,
         multiSelectController = null;
 
+  /// Creates a multi-select dropdown from a local list.
   DropdownFlutter.multiSelect({
     super.key,
     required this.items,
@@ -482,20 +520,28 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  })  : assert(
+    this.searchRequestErrorBuilder,
+    this.showMultiSelectFooter = true,
+    this.doneText,
+  })  : assert(maxlines > 0),
+        assert(recentSelectionsMaxCount >= 0),
+        assert(listItemHeight == null || listItemHeight > 0),
+        assert(overlayHeight == null || overlayHeight > 0),
+        assert(
           initialItems == null || multiSelectController == null,
           'Only one of initialItems or controller can be specified at a time',
         ),
         assert(
           initialItems == null ||
               initialItems.isEmpty ||
-              initialItems.any((e) => items!.contains(e)),
+              initialItems.every((e) => (items ?? const []).contains(e)),
           'Initial items must match with the items in the items list.',
         ),
         assert(
           multiSelectController == null ||
               multiSelectController.value.isEmpty ||
-              multiSelectController.value.any((e) => items!.contains(e)),
+              multiSelectController.value
+                  .every((e) => (items ?? const []).contains(e)),
           'Controller value must match with one of the item in items list.',
         ),
         _searchType = null,
@@ -513,6 +559,7 @@ class DropdownFlutter<T> extends StatefulWidget {
         searchRequestLoadingIndicator = null,
         closeDropDownOnClearFilterSearch = false;
 
+  /// Creates a multi-select dropdown with local list filtering.
   DropdownFlutter.multiSelectSearch({
     super.key,
     required this.items,
@@ -558,20 +605,28 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  })  : assert(
+    this.searchRequestErrorBuilder,
+    this.showMultiSelectFooter = true,
+    this.doneText,
+  })  : assert(maxlines > 0),
+        assert(recentSelectionsMaxCount >= 0),
+        assert(listItemHeight == null || listItemHeight > 0),
+        assert(overlayHeight == null || overlayHeight > 0),
+        assert(
           initialItems == null || multiSelectController == null,
           'Only one of initialItems or controller can be specified at a time',
         ),
         assert(
           initialItems == null ||
               initialItems.isEmpty ||
-              initialItems.any((e) => items!.contains(e)),
+              initialItems.every((e) => (items ?? const []).contains(e)),
           'Initial items must match with the items in the items list.',
         ),
         assert(
           multiSelectController == null ||
               multiSelectController.value.isEmpty ||
-              multiSelectController.value.any((e) => items!.contains(e)),
+              multiSelectController.value
+                  .every((e) => (items ?? const []).contains(e)),
           'Controller value must match with one of the item in items list.',
         ),
         _searchType = _SearchType.onListData,
@@ -585,6 +640,7 @@ class DropdownFlutter<T> extends StatefulWidget {
         futureRequestDelay = null,
         searchRequestLoadingIndicator = null;
 
+  /// Creates a multi-select dropdown that fetches nonempty search queries.
   const DropdownFlutter.multiSelectSearchRequest({
     super.key,
     required this.futureRequest,
@@ -633,7 +689,14 @@ class DropdownFlutter<T> extends StatefulWidget {
     this.showSelectAll = false,
     this.selectAllText,
     this.clearAllText,
-  })  : assert(
+    this.searchRequestErrorBuilder,
+    this.showMultiSelectFooter = true,
+    this.doneText,
+  })  : assert(maxlines > 0),
+        assert(recentSelectionsMaxCount >= 0),
+        assert(listItemHeight == null || listItemHeight > 0),
+        assert(overlayHeight == null || overlayHeight > 0),
+        assert(
           initialItems == null || multiSelectController == null,
           'Only one of initialItems or controller can be specified at a time',
         ),
@@ -651,10 +714,15 @@ class DropdownFlutter<T> extends StatefulWidget {
 
 class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
   final layerLink = LayerLink();
+  final _fieldFocusNode = FocusNode();
   late SingleSelectController<T?> selectedItemNotifier;
   late MultiSelectController<T> selectedItemsNotifier;
   late List<T> _recentItems;
   FormFieldState<(T?, List<T>)>? _formFieldState;
+  late T? _resetItem;
+  late List<T> _resetItems;
+  bool _resetting = false;
+  int _updateGeneration = 0;
 
   // Named so they can be detached again: an app-supplied controller outlives
   // this state, and a listener left behind would call setState on unmounted
@@ -671,14 +739,17 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
       updated.removeRange(widget.recentSelectionsMaxCount, updated.length);
     }
     setState(() => _recentItems = updated);
-    widget.onRecentItemsChanged?.call(_recentItems);
+    widget.onRecentItemsChanged?.call(List<T>.unmodifiable(_recentItems));
   }
 
   @override
   void initState() {
     super.initState();
 
-    _recentItems = List<T>.of(widget.initialRecentItems ?? <T>[]);
+    _recentItems = (widget.initialRecentItems ?? <T>[])
+        .toSet()
+        .take(widget.recentSelectionsMaxCount)
+        .toList();
 
     selectedItemNotifier =
         widget.controller ?? SingleSelectController(widget.initialItem);
@@ -686,11 +757,18 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
     selectedItemsNotifier = widget.multiSelectController ??
         MultiSelectController(widget.initialItems ?? []);
 
+    _resetItem = selectedItemNotifier.value;
+    _resetItems = List<T>.of(selectedItemsNotifier.value);
+
     _selectedItemListener = () {
       // The notifier can fire while this state is being torn down (or, for a
       // shared controller, from another widget entirely); a dead state must
       // not run callbacks or touch its form field.
-      if (!mounted) return;
+      if (!mounted ||
+          _resetting ||
+          widget._dropdownType != _DropdownType.singleSelect) {
+        return;
+      }
       widget.onChanged?.call(selectedItemNotifier.value);
       final formFieldState = _formFieldState;
       if (formFieldState == null || !formFieldState.mounted) return;
@@ -702,7 +780,11 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
     selectedItemNotifier.addListener(_selectedItemListener);
 
     _selectedItemsListener = () {
-      if (!mounted) return;
+      if (!mounted ||
+          _resetting ||
+          widget._dropdownType != _DropdownType.multipleSelect) {
+        return;
+      }
       widget.onListChanged?.call(selectedItemsNotifier.value);
       final formFieldState = _formFieldState;
       if (formFieldState == null || !formFieldState.mounted) return;
@@ -717,40 +799,70 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
   @override
   void didUpdateWidget(covariant DropdownFlutter<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (widget.initialItem != oldWidget.initialItem &&
-        selectedItemNotifier.value != widget.initialItem) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        // The state (and with it an implicit controller) may be gone by the
-        // time the frame ends.
-        if (!mounted) return;
-        selectedItemNotifier.value = widget.initialItem;
-      });
-    }
-
-    if (widget.initialItems != oldWidget.initialItems &&
-        selectedItemsNotifier.value != widget.initialItems) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        selectedItemsNotifier.value = widget.initialItems ?? [];
-      });
-    }
-
-    if (widget.controller != oldWidget.controller &&
-        widget.controller != null) {
-      // Move the listener with the controller: leaving it on the old
-      // instance both strands it there and leaves the new controller
-      // without one, silently disabling onChanged and form updates.
-      selectedItemNotifier.removeListener(_selectedItemListener);
-      selectedItemNotifier = widget.controller!;
+    final generation = ++_updateGeneration;
+    bool selectionChanged = false;
+    if (widget.controller != oldWidget.controller) {
+      final previous = selectedItemNotifier;
+      previous.removeListener(_selectedItemListener);
+      selectedItemNotifier = widget.controller ??
+          SingleSelectController(widget.initialItem ?? previous.value);
       selectedItemNotifier.addListener(_selectedItemListener);
+      if (oldWidget.controller == null) previous.dispose();
+      _resetItem = selectedItemNotifier.value;
+      selectionChanged = true;
     }
-
-    if (widget.multiSelectController != oldWidget.multiSelectController &&
-        widget.multiSelectController != null) {
-      selectedItemsNotifier.removeListener(_selectedItemsListener);
-      selectedItemsNotifier = widget.multiSelectController!;
+    if (widget.multiSelectController != oldWidget.multiSelectController) {
+      final previous = selectedItemsNotifier;
+      previous.removeListener(_selectedItemsListener);
+      selectedItemsNotifier = widget.multiSelectController ??
+          MultiSelectController(widget.initialItems ?? previous.value);
       selectedItemsNotifier.addListener(_selectedItemsListener);
+      if (oldWidget.multiSelectController == null) previous.dispose();
+      _resetItems = List<T>.of(selectedItemsNotifier.value);
+      selectionChanged = true;
+    }
+    final updateSingle = widget.controller == null &&
+        widget.initialItem != oldWidget.initialItem;
+    final updateMulti = widget.multiSelectController == null &&
+        !listEquals(widget.initialItems, oldWidget.initialItems);
+    if (updateSingle) _resetItem = widget.initialItem;
+    if (updateMulti) _resetItems = List<T>.of(widget.initialItems ?? <T>[]);
+    if (selectionChanged || updateSingle || updateMulti) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || generation != _updateGeneration) return;
+        if (updateSingle) selectedItemNotifier.value = widget.initialItem;
+        if (updateMulti) {
+          selectedItemsNotifier.value = widget.initialItems ?? [];
+        }
+        final field = _formFieldState;
+        if (field != null && field.mounted) {
+          field.didChange(
+              (selectedItemNotifier.value, selectedItemsNotifier.value));
+        }
+      });
+    }
+    if (widget.recentSelectionsMaxCount != oldWidget.recentSelectionsMaxCount ||
+        !listEquals(widget.initialRecentItems, oldWidget.initialRecentItems)) {
+      _recentItems = (widget.initialRecentItems ?? _recentItems)
+          .toSet()
+          .take(widget.recentSelectionsMaxCount)
+          .toList();
+    }
+  }
+
+  void _reset() {
+    _resetting = true;
+    try {
+      selectedItemNotifier.value = _resetItem;
+      selectedItemsNotifier.value = _resetItems;
+    } finally {
+      _resetting = false;
+    }
+    setState(() {});
+    if (widget._dropdownType == _DropdownType.singleSelect) {
+      widget.onChanged?.call(selectedItemNotifier.value);
+    } else {
+      widget.onListChanged?.call(selectedItemsNotifier.value);
     }
   }
 
@@ -770,6 +882,7 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
     if (widget.multiSelectController == null) {
       selectedItemsNotifier.dispose();
     }
+    _fieldFocusNode.dispose();
     super.dispose();
   }
 
@@ -783,7 +896,9 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
     return IgnorePointer(
       ignoring: !widget.enabled,
       child: FormField<(T?, List<T>)>(
-        initialValue: (selectedItemNotifier.value, selectedItemsNotifier.value),
+        initialValue: (_resetItem, _resetItems),
+        enabled: enabled,
+        onReset: _reset,
         validator: (val) {
           if (widget._dropdownType == _DropdownType.singleSelect &&
               widget.validator != null) {
@@ -805,10 +920,12 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
               contentPadding: EdgeInsets.zero,
             ),
             child: _OverlayBuilder(
+              enabled: enabled,
               overlayPortalController: widget.overlayController,
               visibility: widget.visibility,
-              overlay: (size, hideCallback) {
+              overlay: (size, anchorOffset, hideCallback) {
                 return _DropdownOverlay<T>(
+                  closeOnClear: widget.closeDropDownOnClearFilterSearch,
                   onItemSelect: (T value) {
                     bool registerRecent = true;
                     switch (widget._dropdownType) {
@@ -824,7 +941,7 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
                         }
                         selectedItemsNotifier.value = currentVal;
                     }
-                    if (registerRecent) _registerRecent(value);
+                    if (mounted && registerRecent) _registerRecent(value);
                   },
                   noResultFoundText:
                       widget.noResultFoundText ?? 'No result found.',
@@ -834,9 +951,15 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
                   selectedItemNotifier: selectedItemNotifier,
                   selectedItemsNotifier: selectedItemsNotifier,
                   size: size,
+                  anchorOffset: anchorOffset,
                   listItemBuilder: widget.listItemBuilder,
                   layerLink: layerLink,
-                  hideOverlay: hideCallback,
+                  hideOverlay: () {
+                    hideCallback();
+                    if (mounted && widget.enabled) {
+                      _fieldFocusNode.requestFocus();
+                    }
+                  },
                   hintStyle: decoration?.hintStyle,
                   headerStyle: decoration?.headerStyle,
                   noResultFoundStyle: decoration?.noResultFoundStyle,
@@ -876,6 +999,9 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
                   showSelectAll: widget.showSelectAll,
                   selectAllText: widget.selectAllText,
                   clearAllText: widget.clearAllText,
+                  searchRequestErrorBuilder: widget.searchRequestErrorBuilder,
+                  showMultiSelectFooter: widget.showMultiSelectFooter,
+                  doneText: widget.doneText,
                 );
               },
               child: (showCallback) {
@@ -883,6 +1009,7 @@ class _DropdownFlutterState<T> extends State<DropdownFlutter<T>> {
                   link: layerLink,
                   child: _DropDownField<T>(
                     onTap: showCallback,
+                    focusNode: _fieldFocusNode,
                     selectedItemNotifier: selectedItemNotifier,
                     border: formFieldState.hasError
                         ? (decoration?.closedErrorBorder ?? _defaultErrorBorder)

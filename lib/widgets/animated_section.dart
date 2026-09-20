@@ -24,7 +24,7 @@ class _AnimatedSection extends StatefulWidget {
 class _AnimatedSectionState extends State<_AnimatedSection>
     with SingleTickerProviderStateMixin {
   late AnimationController animController;
-  late Animation<double> animation;
+  late CurvedAnimation animation;
 
   @override
   void initState() {
@@ -39,7 +39,9 @@ class _AnimatedSectionState extends State<_AnimatedSection>
       duration: widget.duration ?? const Duration(milliseconds: 300),
     )..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
-          widget.animationDismissed();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && !widget.expand) widget.animationDismissed();
+          });
         }
       });
 
@@ -60,11 +62,15 @@ class _AnimatedSectionState extends State<_AnimatedSection>
   @override
   void didUpdateWidget(_AnimatedSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    runExpand();
+    animController.duration =
+        widget.duration ?? const Duration(milliseconds: 300);
+    animation.curve = widget.curve ?? Curves.linearToEaseOut;
+    if (oldWidget.expand != widget.expand) runExpand();
   }
 
   @override
   void dispose() {
+    animation.dispose();
     animController.dispose();
     super.dispose();
   }
@@ -73,10 +79,16 @@ class _AnimatedSectionState extends State<_AnimatedSection>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: animation,
-      child: SizeTransition(
-        alignment: widget.alignment,
-        sizeFactor: animation,
+      child: AnimatedBuilder(
+        animation: animation,
         child: widget.child,
+        builder: (context, child) => ClipRect(
+          child: Align(
+            alignment: widget.alignment,
+            heightFactor: animation.value.clamp(0.0, 1.0),
+            child: child,
+          ),
+        ),
       ),
     );
   }

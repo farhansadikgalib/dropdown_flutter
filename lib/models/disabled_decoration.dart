@@ -1,9 +1,10 @@
 part of '../custom_dropdown.dart';
 
+/// Appearance overrides applied when a dropdown is disabled.
 class CustomDropdownDisabledDecoration {
   /// [DropdownFlutter] field color (disabled state).
   ///
-  /// Default to Color(0xFFF3F3F3).
+  /// Defaults to the ambient surface color at half opacity.
   final Color? fillColor;
 
   /// [DropdownFlutter] box shadow (disabled state).
@@ -27,6 +28,7 @@ class CustomDropdownDisabledDecoration {
   /// The style to use for the [DropdownFlutter] header text (disabled state).
   final TextStyle? headerStyle;
 
+  /// Creates appearance overrides for a disabled dropdown.
   const CustomDropdownDisabledDecoration({
     this.fillColor,
     this.shadow,

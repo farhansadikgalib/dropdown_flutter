@@ -1,5 +1,6 @@
 part of '../custom_dropdown.dart';
 
+/// Selection, hover, checkbox, and search-match styling for dropdown rows.
 class ListItemDecoration {
   /// Splash color for [DropdownFlutter] list item area.
   ///
@@ -17,15 +18,15 @@ class ListItemDecoration {
   final Color? selectedColor;
 
   /// Selected icon color for [DropdownFlutter] list item area.
-  /// Useless if [listItemBuilder] provided.
+  /// Useless if [DropdownFlutter.listItemBuilder] provided.
   final Color? selectedIconColor;
 
   /// Selected icon border for [DropdownFlutter] list item area.
-  /// Useless if [listItemBuilder] provided.
+  /// Useless if [DropdownFlutter.listItemBuilder] provided.
   final BorderSide? selectedIconBorder;
 
   /// Selected icon shape for [DropdownFlutter] list item area.
-  /// Useless if [listItemBuilder] provided.
+  /// Useless if [DropdownFlutter.listItemBuilder] provided.
   final OutlinedBorder? selectedIconShape;
 
   /// Background color of the row highlighted via keyboard navigation.
@@ -40,6 +41,7 @@ class ListItemDecoration {
   /// list item builder is used. Default to a bold span.
   final TextStyle? searchMatchTextStyle;
 
+  /// Creates styling overrides for dropdown rows.
   const ListItemDecoration({
     this.splashColor,
     this.highlightColor,

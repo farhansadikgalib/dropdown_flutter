@@ -1,3 +1,38 @@
+## 1.3.0
+
+- Add distinct remote-search prompt, empty, and error states with Retry and a
+  customizable `searchRequestErrorBuilder`.
+- Add a multi-select selection count and Done action, with `doneText` and
+  `showMultiSelectFooter` customization; selections still apply immediately.
+- Restore field focus after dismissal, support Escape independently of arrow-key
+  navigation, and prevent keyboard selection of stale results while loading.
+- Autofocus desktop search, retain focus after clearing, hide the clear action
+  when empty, and show a theme-colored search focus border.
+- Fix async search races, pending debounce timers after clearing, and callbacks
+  after disposal. Dispose search focus nodes correctly.
+- Fix controller ownership when switching between internal and external state,
+  controller replacement while open, and form reset/validation synchronization.
+- Make multi-select values immutable and duplicate-free; validate every local
+  initial selection and apply select-all to filtered/network results.
+- Refresh open menus when items or controller values change; wire clear-to-close.
+- Bound all menus to available space, including short lists with tall rows;
+  support compact layouts, RTL group headings, and reduced-motion settings.
+- Use theme surfaces and disabled colors; add keyboard activation and button
+  semantics to closed fields.
+- Export public builder typedefs and add the `dropdown_flutter.dart` entry point.
+- Correct minimum requirements to Flutter 3.27 / Dart 3.6, removing a newer-only
+  animation API. Keep compatible development lints for the minimum SDK.
+- Modernize the example web bootstrap and metadata.
+- Keep keyboard-highlighted custom rows visible using their actual layout.
+- Add regression tests, reusable example gallery tests, and a Flutter CI matrix.
+
+### Migration notes
+
+Assign a new list to `MultiSelectController.value` or use its helper methods;
+mutating the returned list is no longer supported. Select-all/clear-all now apply
+only to visible search results. Theme-derived default colors and bounded menu
+heights may change appearance; explicit decorations remain supported.
+
 # 1.2.1
 
 **Fixed**

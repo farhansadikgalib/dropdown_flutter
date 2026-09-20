@@ -1,14 +1,15 @@
 part of '../custom_dropdown.dart';
 
+/// Colors, borders, text styles, and nested decorations for an enabled dropdown.
 class CustomDropdownDecoration {
   /// [DropdownFlutter] field color (closed state).
   ///
-  /// Default to [Colors.white].
+  /// Defaults to the ambient color scheme surface.
   final Color? closedFillColor;
 
   /// [DropdownFlutter] overlay color (opened/expanded state).
   ///
-  /// Default to [Colors.white].
+  /// Defaults to the ambient color scheme surface.
   final Color? expandedFillColor;
 
   /// [DropdownFlutter] box shadow (closed state).
@@ -53,7 +54,7 @@ class CustomDropdownDecoration {
   /// The style to use for the [DropdownFlutter] no result found area.
   final TextStyle? noResultFoundStyle;
 
-  /// The style to use for the string returning from [validator].
+  /// The style to use for the string returning from [DropdownFlutter.validator].
   final TextStyle? errorStyle;
 
   /// The style to use for the [DropdownFlutter] list item text.
@@ -68,6 +69,7 @@ class CustomDropdownDecoration {
   /// [DropdownFlutter] list item decoration.
   final ListItemDecoration? listItemDecoration;
 
+  /// Creates dropdown styling overrides; omitted values use widget defaults.
   const CustomDropdownDecoration({
     this.closedFillColor,
     this.expandedFillColor,
@@ -146,6 +148,4 @@ class CustomDropdownDecoration {
       listItemDecoration: listItemDecoration ?? this.listItemDecoration,
     );
   }
-
-  static const Color _defaultFillColor = Colors.white;
 }
